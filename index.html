@@ -3,22 +3,26 @@
 <head>
   <title>NO-risk</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: "Segoe UI", Arial;
       background: #0f172a;
       color: white;
+      overflow-x: hidden; /* removes bottom scroll */
     }
 
     /* NAVBAR */
     .navbar {
       width: 100%;
-      padding: 15px 30px;
+      padding: 15px 20px;
       background: #020617;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
     }
 
     .logo {
@@ -27,13 +31,18 @@
       color: #3b82f6;
     }
 
-    .nav-links span {
-      margin-left: 20px;
-      color: #94a3b8;
-      cursor: pointer;
+    .nav-links {
+      display: flex;
+      gap: 15px;
     }
 
-    .nav-links span:hover {
+    .nav-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .nav-links a:hover {
       color: white;
     }
 
@@ -42,8 +51,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 80px;
+      margin-top: 60px;
       text-align: center;
+      padding: 20px;
     }
 
     h1 {
@@ -52,12 +62,13 @@
 
     p {
       color: #94a3b8;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
 
     #dropzone {
-      width: 420px;
-      height: 200px;
+      width: 100%;
+      max-width: 420px;
+      height: 180px;
       border: 2px dashed #3b82f6;
       border-radius: 16px;
       display: flex;
@@ -68,35 +79,18 @@
       transition: 0.2s;
     }
 
-    #dropzone:hover {
-      border-color: #60a5fa;
-      background: rgba(255,255,255,0.06);
-    }
-
     #dropzone.hover {
       border-color: #22c55e;
       background: rgba(34,197,94,0.1);
     }
 
-    #status {
+    .buttons {
       margin-top: 15px;
-      color: #94a3b8;
-    }
-
-    #output {
-      margin-top: 20px;
-      width: 450px;
-      max-height: 200px;
-      overflow: auto;
-      background: rgba(0,0,0,0.5);
-      padding: 15px;
-      border-radius: 12px;
-      text-align: left;
-      font-size: 13px;
+      display: flex;
+      gap: 10px;
     }
 
     button {
-      margin-top: 15px;
       padding: 10px 15px;
       background: #3b82f6;
       border: none;
@@ -107,6 +101,29 @@
 
     button:hover {
       background: #2563eb;
+    }
+
+    button:disabled {
+      background: #334155;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 15px;
+      color: #94a3b8;
+    }
+
+    #output {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 450px;
+      max-height: 200px;
+      overflow: auto;
+      background: rgba(0,0,0,0.5);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: left;
+      font-size: 13px;
     }
 
     input {
@@ -120,8 +137,8 @@
 <div class="navbar">
   <div class="logo">NO-risk</div>
   <div class="nav-links">
-    <span>Upload</span>
-    <span>About</span>
+    <a href="#" onclick="openUpload()">Upload</a>
+    <a href="https://github.com/goat-67/NO-risk#readme" target="_blank">About</a>
   </div>
 </div>
 
@@ -130,8 +147,13 @@
   <h1>File → JSON Converter</h1>
   <p>Upload CSV or Excel files securely</p>
 
-  <div id="dropzone">Click or Drag File</div>
+  <div id="dropzone">Drag file here</div>
   <input type="file" id="fileInput" accept=".xlsx,.csv">
+
+  <div class="buttons">
+    <button onclick="openUpload()">Upload File</button>
+    <button id="downloadBtn" disabled>Download JSON</button>
+  </div>
 
   <div id="status">Waiting for file...</div>
   <div id="output"></div>
@@ -142,13 +164,21 @@ const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
 const output = document.getElementById("output");
 const status = document.getElementById("status");
+const downloadBtn = document.getElementById("downloadBtn");
 
-dropzone.addEventListener("click", () => fileInput.click());
+let fullData = null;
 
+// Open file explorer
+function openUpload() {
+  fileInput.click();
+}
+
+// File selected
 fileInput.addEventListener("change", () => {
   handleFile(fileInput.files[0]);
 });
 
+// Drag events
 dropzone.addEventListener("dragover", (e) => {
   e.preventDefault();
   dropzone.classList.add("hover");
@@ -164,6 +194,7 @@ dropzone.addEventListener("drop", (e) => {
   handleFile(e.dataTransfer.files[0]);
 });
 
+// Handle file
 async function handleFile(file) {
   if (!file) return;
 
@@ -176,6 +207,7 @@ async function handleFile(file) {
 
   status.textContent = "⏳ Processing...";
   output.textContent = "";
+  downloadBtn.disabled = true;
 
   const formData = new FormData();
   formData.append("file", file);
@@ -190,40 +222,38 @@ async function handleFile(file) {
 
     status.textContent = "✅ Done";
 
-    // Show preview
+    // show preview
     output.textContent = JSON.stringify(data.preview, null, 2);
 
-    // Remove old button if exists
-    const oldBtn = document.getElementById("downloadBtn");
-    if (oldBtn) oldBtn.remove();
+    // store full data
+    fullData = data.full_data;
 
-    // Create download button
-    const btn = document.createElement("button");
-    btn.id = "downloadBtn";
-    btn.textContent = "Download Full JSON";
-
-    btn.onclick = () => {
-      const blob = new Blob(
-        [JSON.stringify(data.full_data, null, 2)],
-        { type: "application/json" }
-      );
-
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "converted.json";
-      a.click();
-
-      URL.revokeObjectURL(url);
-    };
-
-    output.appendChild(btn);
+    // enable download button
+    downloadBtn.disabled = false;
 
   } catch (err) {
     status.textContent = "❌ Error connecting to backend";
   }
 }
+
+// Download JSON
+downloadBtn.onclick = () => {
+  if (!fullData) return;
+
+  const blob = new Blob(
+    [JSON.stringify(fullData, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "converted.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+};
 </script>
 
 </body>
