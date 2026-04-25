@@ -1,74 +1,32 @@
 <!DOCTYPE html>
+
 <html>
 <head>
   <title>NO-risk</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: "Inter", "Segoe UI", Arial;
       background: #0f172a;
       color: #e2e8f0;
-      overflow-x: hidden;
     }
-
-    /* NAVBAR */
     .navbar {
       width: 100%;
       padding: 16px 24px;
       background: #020617;
       display: flex;
       justify-content: space-between;
-      align-items: center;
       border-bottom: 1px solid #1e293b;
     }
-
-    .logo {
-      font-size: 18px;
-      font-weight: 600;
-      color: #3b82f6;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 16px;
-    }
-
-    .nav-links a {
-      text-decoration: none;
-      color: #94a3b8;
-      font-size: 14px;
-      transition: 0.2s;
-    }
-
-    .nav-links a:hover {
-      color: white;
-    }
-
-    /* MAIN */
+    .logo { color: #3b82f6; font-weight: 600; }
     .container {
       max-width: 700px;
       margin: 60px auto;
       text-align: center;
       padding: 20px;
     }
-
-    h1 {
-      font-size: 28px;
-      margin-bottom: 8px;
-    }
-
-    p {
-      color: #94a3b8;
-      margin-bottom: 30px;
-    }
-
-    /* DROPZONE */
     #dropzone {
-      width: 100%;
       height: 180px;
       border: 2px dashed #334155;
       border-radius: 16px;
@@ -76,52 +34,16 @@
       align-items: center;
       justify-content: center;
       background: #020617;
-      transition: 0.2s;
       margin-bottom: 15px;
     }
-
-    #dropzone.hover {
-      border-color: #22c55e;
-      background: rgba(34,197,94,0.1);
-    }
-
-    /* BUTTONS */
-    .buttons {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
     button {
-      padding: 10px 14px;
-      border-radius: 8px;
+      padding: 10px;
       border: none;
       background: #3b82f6;
       color: white;
-      font-size: 13px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: 0.2s;
     }
-
-    button:hover {
-      background: #2563eb;
-    }
-
-    button:disabled {
-      background: #334155;
-      cursor: not-allowed;
-    }
-
-    /* STATUS */
-    #status {
-      margin-top: 15px;
-      color: #94a3b8;
-      font-size: 14px;
-    }
-
-    /* OUTPUT */
     #output {
       margin-top: 20px;
       background: #020617;
@@ -134,54 +56,41 @@
       font-size: 12px;
       white-space: pre-wrap;
     }
-
-    input {
-      display: none;
-    }
+    input { display: none; }
   </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
 <div class="navbar">
   <div class="logo">NO-risk</div>
-  <div class="nav-links">
-    <a href="#" onclick="openUpload()">Upload</a>
-    <a href="https://github.com/goat-67/NO-risk#readme" target="_blank">About</a>
-  </div>
 </div>
 
-<!-- MAIN -->
 <div class="container">
   <h1>File → JSON / Markdown</h1>
-  <p>Upload CSV or Excel and convert instantly</p>
 
   <div id="dropzone">Drag file here</div>
   <input type="file" id="fileInput" accept=".xlsx,.csv">
 
-  <div class="buttons">
-    <button onclick="openUpload()">Upload File</button>
-    <button id="downloadJsonBtn" disabled>Download JSON</button>
-    <button id="convertMdBtn" disabled>Convert to MD</button>
-    <button id="downloadMdBtn" disabled>Download MD</button>
-  </div>
+<button onclick="openUpload()">Upload File</button>
 
-  <div id="status">Waiting for file...</div>
+  <div id="status">Waiting...</div>
   <div id="output"></div>
 </div>
 
 <script>
-const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
+const dropzone = document.getElementById("dropzone");
 const output = document.getElementById("output");
 const status = document.getElementById("status");
 
-const downloadJsonBtn = document.getElementById("downloadJsonBtn");
-const convertMdBtn = document.getElementById("convertMdBtn");
-const downloadMdBtn = document.getElementById("downloadMdBtn");
-
 let fullData = null;
-let markdownData = null;
+
+// 🔑 YOUR BACKEND
+const API_URL = "https://no-risk-gkhr.onrender.com/upload";
+
+// 🔑 PUT YOUR KEYS HERE
+const API_KEY = "Yp3!Rf8@Qx6#Lm1$Nz9^Ta5&Kc2*Hb7Ud4Vg0WeJk8SxPqR6tM3nB5C7dF9h";
+const SECRET = "Zk7$Qv9!Lm2#Xr5@Tp8^Wd3*Ns6&Hy1AaB4cD7eF0gHjK9mPqR2sT5uV8wXyZ";
 
 function openUpload() {
   fileInput.click();
@@ -191,119 +100,50 @@ fileInput.addEventListener("change", () => {
   handleFile(fileInput.files[0]);
 });
 
-dropzone.addEventListener("dragover", (e) => {
+dropzone.addEventListener("dragover", e => {
   e.preventDefault();
-  dropzone.classList.add("hover");
 });
 
-dropzone.addEventListener("dragleave", () => {
-  dropzone.classList.remove("hover");
-});
-
-dropzone.addEventListener("drop", (e) => {
+dropzone.addEventListener("drop", e => {
   e.preventDefault();
-  dropzone.classList.remove("hover");
   handleFile(e.dataTransfer.files[0]);
 });
 
 async function handleFile(file) {
   if (!file) return;
 
-  const name = file.name.toLowerCase();
-
-  if (!(name.endsWith(".xlsx") || name.endsWith(".csv"))) {
-    status.textContent = "❌ Only CSV or Excel files allowed";
-    return;
-  }
-
-  status.textContent = "⏳ Processing...";
+  status.textContent = "⏳ Uploading...";
   output.textContent = "";
-
-  downloadJsonBtn.disabled = true;
-  convertMdBtn.disabled = true;
-  downloadMdBtn.disabled = true;
 
   const formData = new FormData();
   formData.append("file", file);
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/upload", {
+    const res = await fetch(API_URL, {
       method: "POST",
+      headers: {
+        "x-api-key": API_KEY,
+        "x-internal-secret": SECRET
+      },
       body: formData
     });
 
     const data = await res.json();
 
-    // 🚨 HANDLE BACKEND ERRORS
-    if (data.error) {
-      status.textContent = "❌ " + data.error;
+    if (!res.ok) {
+      status.textContent = "❌ " + (data.detail || "Upload failed");
       return;
     }
 
-    // ✅ SUCCESS
-    fullData = data.full_data;
+    fullData = data.preview;
 
     output.textContent = JSON.stringify(data.preview, null, 2);
-    status.textContent = "✅ File ready";
-
-    downloadJsonBtn.disabled = false;
-    convertMdBtn.disabled = false;
+    status.textContent = "✅ Success";
 
   } catch (err) {
-    status.textContent = "❌ Backend connection failed";
+    status.textContent = "❌ Cannot connect to backend";
   }
 }
-downloadJsonBtn.onclick = () => {
-  if (!fullData) return;
-
-  const blob = new Blob(
-    [JSON.stringify(fullData, null, 2)],
-    { type: "application/json" }
-  );
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-
-  a.href = url;
-  a.download = "converted.json";
-  a.click();
-
-  URL.revokeObjectURL(url);
-};
-
-convertMdBtn.onclick = () => {
-  if (!fullData || !fullData.length) return;
-
-  const keys = Object.keys(fullData[0]);
-
-  let md = "| " + keys.join(" | ") + " |\n";
-  md += "| " + keys.map(() => "---").join(" | ") + " |\n";
-
-  fullData.forEach(row => {
-    md += "| " + keys.map(k => row[k] ?? "").join(" | ") + " |\n";
-  });
-
-  markdownData = md;
-  output.textContent = md;
-  status.textContent = "✅ Converted to Markdown";
-
-  downloadMdBtn.disabled = false;
-};
-
-downloadMdBtn.onclick = () => {
-  if (!markdownData) return;
-
-  const blob = new Blob([markdownData], { type: "text/markdown" });
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-
-  a.href = url;
-  a.download = "converted.md";
-  a.click();
-
-  URL.revokeObjectURL(url);
-};
 </script>
 
 </body>
