@@ -8,6 +8,7 @@ import os
 import signal
 import hmac
 import logging
+import re
 
 # =========================
 # APP INIT
@@ -85,6 +86,34 @@ def verify(value: str, expected: str):
     return hmac.compare_digest(value or "", expected)
 
 # =========================
+# 🚨 SENSITIVE DATA DETECTION
+# =========================
+def contains_ssn(text: str) -> bool:
+    return bool(re.search(r"\b\d{3}-\d{2}-\d{4}\b", text))
+
+def contains_credit_card(text: str) -> bool:
+    # straight digits
+    if re.search(r"\b\d{13,19}\b", text):
+        return True
+
+    # spaced or dashed formats
+    cleaned = re.sub(r"[ -]", "", text)
+    if cleaned.isdigit() and 13 <= len(cleaned) <= 19:
+        return True
+
+    return False
+
+def has_sensitive_data(df):
+    for col in df.columns:
+        for val in df[col]:
+            val_str = str(val)
+
+            if contains_ssn(val_str) or contains_credit_card(val_str):
+                return True
+
+    return False
+
+# =========================
 # ROUTES
 # =========================
 @app.get("/")
@@ -92,7 +121,7 @@ def home():
     return {"status": "ok"}
 
 @app.post("/upload")
-@limiter.limit("3/minute")
+@limiter.limit("10/minute")
 async def upload_file(
     request: Request,
     file: UploadFile = File(...),
@@ -143,6 +172,13 @@ async def upload_file(
 
         finally:
             signal.alarm(0)
+
+        # 🚨 SENSITIVE DATA CHECK (IMPORTANT)
+        if has_sensitive_data(df):
+            raise HTTPException(
+                status_code=400,
+                detail="Sensitive data detected (SSN or credit card). Upload rejected."
+            )
 
         # 🔒 LIMIT DATA SIZE
         if df.shape[0] > MAX_ROWS:
