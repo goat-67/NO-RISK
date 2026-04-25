@@ -234,6 +234,13 @@ async function handleFile(file) {
 
     const data = await res.json();
 
+    // 🚨 HANDLE BACKEND ERRORS
+    if (data.error) {
+      status.textContent = "❌ " + data.error;
+      return;
+    }
+
+    // ✅ SUCCESS
     fullData = data.full_data;
 
     output.textContent = JSON.stringify(data.preview, null, 2);
@@ -243,10 +250,9 @@ async function handleFile(file) {
     convertMdBtn.disabled = false;
 
   } catch (err) {
-    status.textContent = "❌ Backend error";
+    status.textContent = "❌ Backend connection failed";
   }
 }
-
 downloadJsonBtn.onclick = () => {
   if (!fullData) return;
 
