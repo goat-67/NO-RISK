@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NO-risk Upload</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+    }
+
+    #dropzone {
+      width: 400px;
+      height: 200px;
+      border: 3px dashed #888;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 50px auto;
+      transition: 0.2s;
+    }
+
+    #dropzone.hover {
+      border-color: green;
+      background-color: #f0fff0;
+    }
+
+    #output {
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Drop File Here</h1>
+
+<div id="dropzone">Drag & Drop File</div>
+
+<div id="output"></div>
+
+<script>
+const dropzone = document.getElementById("dropzone");
+const output = document.getElementById("output");
+
+// Highlight when dragging over
+dropzone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropzone.classList.add("hover");
+});
+
+// Remove highlight
+dropzone.addEventListener("dragleave", () => {
+  dropzone.classList.remove("hover");
+});
+
+// Handle drop
+dropzone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropzone.classList.remove("hover");
+
+  const file = e.dataTransfer.files[0];
+
+  if (!file) {
+    output.textContent = "No file detected.";
+    return;
+  }
+
+  // Show file info (frontend-only test)
+  output.textContent = 
+    "File name: " + file.name + "\n" +
+    "Size: " + file.size + " bytes\n" +
+    "Type: " + file.type;
+});
+</script>
+
+</body>
+</html>
