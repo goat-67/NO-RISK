@@ -1,60 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NO-risk Upload</title>
+  <title>NO-risk</title>
   <style>
     body {
-      font-family: Arial;
+      margin: 0;
+      font-family: "Segoe UI", Arial;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      color: white;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       text-align: center;
-      background-color: #f5f5f5;
     }
 
     h1 {
-      margin-top: 40px;
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #94a3b8;
+      margin-bottom: 30px;
     }
 
     #dropzone {
-      width: 450px;
-      height: 220px;
-      border: 3px dashed #888;
-      border-radius: 12px;
+      width: 400px;
+      height: 200px;
+      border: 2px dashed #3b82f6;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 40px auto;
-      background-color: white;
-      transition: 0.2s;
-      font-size: 18px;
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    #dropzone:hover {
+      border-color: #60a5fa;
+      background: rgba(255,255,255,0.06);
     }
 
     #dropzone.hover {
-      border-color: green;
-      background-color: #f0fff0;
+      border-color: #22c55e;
+      background: rgba(34,197,94,0.1);
     }
 
     #output {
-      width: 450px;
-      margin: 20px auto;
+      margin-top: 25px;
+      width: 420px;
+      max-height: 200px;
+      overflow: auto;
+      background: rgba(0,0,0,0.4);
       padding: 15px;
-      background: white;
-      border-radius: 10px;
+      border-radius: 12px;
       text-align: left;
-      white-space: pre-wrap;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+
+    input {
+      display: none;
+    }
+
+    .status {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #94a3b8;
     }
   </style>
 </head>
 <body>
 
-<h1>Upload Excel or CSV File</h1>
+<div class="container">
+  <h1>NO-risk</h1>
+  <p>Secure File → JSON Converter</p>
 
-<div id="dropzone">Drag & Drop (.xlsx or .csv)</div>
+  <div id="dropzone">Click or Drag File</div>
+  <input type="file" id="fileInput" accept=".xlsx,.csv">
 
-<div id="output">Waiting for file...</div>
+  <div class="status" id="status">Waiting for file...</div>
+  <div id="output"></div>
+</div>
 
 <script>
 const dropzone = document.getElementById("dropzone");
+const fileInput = document.getElementById("fileInput");
 const output = document.getElementById("output");
+const status = document.getElementById("status");
+
+dropzone.addEventListener("click", () => fileInput.click());
+
+fileInput.addEventListener("change", () => {
+  handleFile(fileInput.files[0]);
+});
 
 dropzone.addEventListener("dragover", (e) => {
   e.preventDefault();
@@ -65,30 +111,23 @@ dropzone.addEventListener("dragleave", () => {
   dropzone.classList.remove("hover");
 });
 
-dropzone.addEventListener("drop", async (e) => {
+dropzone.addEventListener("drop", (e) => {
   e.preventDefault();
   dropzone.classList.remove("hover");
+  handleFile(e.dataTransfer.files[0]);
+});
 
-  const file = e.dataTransfer.files[0];
-
-  if (!file) {
-    output.textContent = "❌ No file detected.";
-    return;
-  }
+async function handleFile(file) {
+  if (!file) return;
 
   const name = file.name.toLowerCase();
 
   if (!(name.endsWith(".xlsx") || name.endsWith(".csv"))) {
-    output.textContent = "❌ Only .xlsx or .csv files allowed.";
+    status.textContent = "❌ Only CSV or Excel files allowed";
     return;
   }
 
-  if (file.size > 50 * 1024 * 1024) {
-    output.textContent = "❌ File too large.";
-    return;
-  }
-
-  output.textContent = "⏳ Uploading and processing...";
+  status.textContent = "⏳ Processing...";
 
   const formData = new FormData();
   formData.append("file", file);
@@ -101,12 +140,13 @@ dropzone.addEventListener("drop", async (e) => {
 
     const data = await res.json();
 
-    output.textContent = "✅ Processed!\n\n" + JSON.stringify(data, null, 2);
+    status.textContent = "✅ Done";
+    output.textContent = JSON.stringify(data, null, 2);
 
   } catch (err) {
-    output.textContent = "❌ Error connecting to backend.";
+    status.textContent = "❌ Error connecting to backend";
   }
-});
+}
 </script>
 
 </body>
