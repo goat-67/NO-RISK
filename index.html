@@ -6,21 +6,47 @@
     body {
       margin: 0;
       font-family: "Segoe UI", Arial;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
+      background: #0f172a;
       color: white;
     }
 
+    /* NAVBAR */
+    .navbar {
+      width: 100%;
+      padding: 15px 30px;
+      background: #020617;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: bold;
+      color: #3b82f6;
+    }
+
+    .nav-links span {
+      margin-left: 20px;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+
+    .nav-links span:hover {
+      color: white;
+    }
+
+    /* MAIN */
     .container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      margin-top: 80px;
       text-align: center;
     }
 
     h1 {
-      font-size: 40px;
       margin-bottom: 10px;
     }
 
@@ -30,7 +56,7 @@
     }
 
     #dropzone {
-      width: 400px;
+      width: 420px;
       height: 200px;
       border: 2px dashed #3b82f6;
       border-radius: 16px;
@@ -38,9 +64,8 @@
       align-items: center;
       justify-content: center;
       background: rgba(255,255,255,0.03);
-      backdrop-filter: blur(10px);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: 0.2s;
     }
 
     #dropzone:hover {
@@ -53,40 +78,62 @@
       background: rgba(34,197,94,0.1);
     }
 
+    #status {
+      margin-top: 15px;
+      color: #94a3b8;
+    }
+
     #output {
-      margin-top: 25px;
-      width: 420px;
+      margin-top: 20px;
+      width: 450px;
       max-height: 200px;
       overflow: auto;
-      background: rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.5);
       padding: 15px;
       border-radius: 12px;
       text-align: left;
       font-size: 13px;
-      color: #e2e8f0;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 15px;
+      background: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2563eb;
     }
 
     input {
       display: none;
     }
-
-    .status {
-      margin-top: 15px;
-      font-size: 14px;
-      color: #94a3b8;
-    }
   </style>
 </head>
 <body>
 
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="logo">NO-risk</div>
+  <div class="nav-links">
+    <span>Upload</span>
+    <span>About</span>
+  </div>
+</div>
+
+<!-- MAIN -->
 <div class="container">
-  <h1>NO-risk</h1>
-  <p>Secure File → JSON Converter</p>
+  <h1>File → JSON Converter</h1>
+  <p>Upload CSV or Excel files securely</p>
 
   <div id="dropzone">Click or Drag File</div>
   <input type="file" id="fileInput" accept=".xlsx,.csv">
 
-  <div class="status" id="status">Waiting for file...</div>
+  <div id="status">Waiting for file...</div>
   <div id="output"></div>
 </div>
 
@@ -128,6 +175,7 @@ async function handleFile(file) {
   }
 
   status.textContent = "⏳ Processing...";
+  output.textContent = "";
 
   const formData = new FormData();
   formData.append("file", file);
@@ -141,7 +189,36 @@ async function handleFile(file) {
     const data = await res.json();
 
     status.textContent = "✅ Done";
-    output.textContent = JSON.stringify(data, null, 2);
+
+    // Show preview
+    output.textContent = JSON.stringify(data.preview, null, 2);
+
+    // Remove old button if exists
+    const oldBtn = document.getElementById("downloadBtn");
+    if (oldBtn) oldBtn.remove();
+
+    // Create download button
+    const btn = document.createElement("button");
+    btn.id = "downloadBtn";
+    btn.textContent = "Download Full JSON";
+
+    btn.onclick = () => {
+      const blob = new Blob(
+        [JSON.stringify(data.full_data, null, 2)],
+        { type: "application/json" }
+      );
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "converted.json";
+      a.click();
+
+      URL.revokeObjectURL(url);
+    };
+
+    output.appendChild(btn);
 
   } catch (err) {
     status.textContent = "❌ Error connecting to backend";
