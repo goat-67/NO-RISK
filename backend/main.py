@@ -101,9 +101,10 @@ async def upload_file(
     x_api_key: str = Header(None),
     x_internal_secret: str = Header(None)
 ):
-    # 🔐 DOUBLE AUTH CHECK
+  # ========================= # 🚨 SENSITIVE DATA DETECTION # ========================= 
+     # 🔐 DOUBLE AUTH CHECK
     if not verify(x_api_key, API_KEY) or not verify(x_internal_secret, SECRET_HEADER):
-        raise HTTPException(sta# ========================= # 🚨 SENSITIVE DATA DETECTION # ========================= 
+        raise HTTPException(status_code=403, detail="Unauthorized")
 def contains_ssn(text: str) -> bool:
     # Matches XXX-XX-XXXX
     return bool(re.search(r"\b\d{3}-\d{2}-\d{4}\b", text))
@@ -141,7 +142,7 @@ def has_sensitive_data(df):
     return False
 
 # ========================= # ROUTES # =========================
-tus_code=403, detail="Unauthorized")
+
 
     try:
         contents = await file.read()
