@@ -3,3 +3,4 @@ uvicorn
 pandas
 slowapi
 openpyxl
+python-multipart
