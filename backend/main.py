@@ -91,10 +91,31 @@ def verify(value: str, expected: str):
 def contains_ssn(text: str) -> bool:
     return bool(re.search(r"\b\d{3}-\d{2}-\d{4}\b", text))
 
+is this betterdef luhn_check(number: str) -> bool:
+    total = 0
+    reverse_digits = number[::-1]
+
+    for i, digit in enumerate(reverse_digits):
+        n = int(digit)
+        if i % 2 == 1:
+            n *= 2
+            if n > 9:
+                n -= 9
+        total += n
+
+    return total % 10 == 0
+
+
 def contains_credit_card(text: str) -> bool:
-    # straight digits
-    if re.search(r"\b\d{13,19}\b", text):
-        return True
+    cleaned = re.sub(r"[ -]", "", text)
+
+    if not cleaned.isdigit():
+        return False
+
+    if not (13 <= len(cleaned) <= 19):
+        return False
+
+    return luhn_check(cleaned)
 
     # spaced or dashed formats
     cleaned = re.sub(r"[ -]", "", text)
