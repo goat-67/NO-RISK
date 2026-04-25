@@ -65,7 +65,7 @@ dropzone.addEventListener("dragleave", () => {
   dropzone.classList.remove("hover");
 });
 
-dropzone.addEventListener("drop", (e) => {
+dropzone.addEventListener("drop", async (e) => {
   e.preventDefault();
   dropzone.classList.remove("hover");
 
@@ -78,26 +78,34 @@ dropzone.addEventListener("drop", (e) => {
 
   const name = file.name.toLowerCase();
 
-  // Accept Excel or CSV
   if (!(name.endsWith(".xlsx") || name.endsWith(".csv"))) {
     output.textContent = "❌ Only .xlsx or .csv files allowed.";
     return;
   }
 
-  // Size limit (you can increase later)
   if (file.size > 50 * 1024 * 1024) {
-    output.textContent = "❌ File too large (limit ~50MB for now).";
+    output.textContent = "❌ File too large.";
     return;
   }
 
-  let fileType = name.endsWith(".csv") ? "CSV" : "Excel";
+  output.textContent = "⏳ Uploading and processing...";
 
-  output.textContent =
-    "✅ File accepted!\n\n" +
-    "Type: " + fileType + "\n" +
-    "Name: " + file.name + "\n" +
-    "Size: " + (file.size / 1024 / 1024).toFixed(2) + " MB\n\n" +
-    "Next step: uploading to backend...";
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    output.textContent = "✅ Processed!\n\n" + JSON.stringify(data, null, 2);
+
+  } catch (err) {
+    output.textContent = "❌ Error connecting to backend.";
+  }
 });
 </script>
 
