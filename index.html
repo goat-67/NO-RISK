@@ -70,6 +70,37 @@ body.glass .navbar {
   cursor: pointer;
   margin-left: 10px;
 }
+  #fileCard {
+  display: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  background: rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.file-icon {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.file-name {
+  flex: 1;
+  text-align: left;
+}
+
+.file-size {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.file-check {
+  color: #22c55e;
+  font-weight: bold;
+}
 
 /* MAIN CARD */
 .container {
@@ -214,7 +245,7 @@ body.light #output {
     <button id="downloadMdBtn" disabled>Download MD</button>
   </div>
 
-  <div id="status">Waiting...</div>
+  <div id="status">Upload a File</div>
   <div id="progressBar"></div>
   <div id="output"></div>
 </div>
@@ -248,7 +279,7 @@ function openUpload() {
 /* RESET UI */
 function resetUI() {
   output.textContent = "";
-  status.textContent = "Waiting...";
+  status.textContent = "Upload a File...";
   progress.style.width = "0%";
   fileCard.style.display = "none";
   fullData = null;
@@ -287,7 +318,12 @@ async function handleFile(file) {
   if (!file) return;
 
   fileCard.style.display = "block";
-  fileCard.textContent = file.name;
+  fileCard.innerHTML = `
+  <span class="file-icon">📄</span>
+  <span class="file-name">${file.name}</span>
+  <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
+  <span class="file-check">✔</span>
+`;
 
   status.textContent = "Uploading...";
   progress.style.width = "40%";
@@ -320,7 +356,7 @@ async function handleFile(file) {
     convertMdBtn.disabled = false;
 
   } catch {
-    status.textContent = "❌ Connection failed";
+    status.textContent = "❌ Sensitive Data entered";
     progress.style.width = "0%";
   }
 }
