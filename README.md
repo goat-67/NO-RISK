@@ -1,19 +1,12 @@
 # NO-RISK
 # File Upload → JSON Converter
 
-Drag-and-drop file upload site with Python backend.
+Drag + drop file site, simple fast- and no data loss to other servers.
 
 ## Features
 - Drag & drop upload
-- FastAPI backend
-- Converts file content into JSON preview
+- No backend - prevents data egress
+- Converts file content into JSON or Markdown preview
 
-## How to run
-
-### Backend
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-
-### Frontend
+## How to run 
 Open index.html in browser
