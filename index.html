@@ -1,341 +1,299 @@
-
 <!DOCTYPE html>
 <html>
 <head>
   <title>NO-risk</title>
+
 <style>
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
   font-family: "Inter", "Segoe UI", Arial;
-  background: radial-gradient(circle at top, #0f172a, #020617);
+  background: linear-gradient(to bottom, #1e293b, #0f172a);
   color: #e2e8f0;
+  transition: 0.3s;
 }
 
 /* LIGHT MODE */
 body.light {
-  background: #f8fafc;
+  background: #f1f5f9;
   color: #0f172a;
 }
 
 /* NAVBAR */
 .navbar {
   padding: 16px 28px;
-  background: rgba(2,6,23,0.7);
-  backdrop-filter: blur(12px);
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  background: rgba(2,6,23,0.7);
 }
 
-.logo { color:#60a5fa; font-weight:600; }
-
-.nav-links {
-  display:flex;
-  gap:15px;
-  align-items:center;
+body.light .navbar {
+  background: white;
 }
 
-#themeToggle {
-  background:none;
-  border:none;
-  cursor:pointer;
-  font-size:16px;
-  color:#94a3b8;
+.logo {
+  color: #60a5fa;
+  font-weight: 600;
 }
 
-/* MAIN */
+.toggle {
+  cursor: pointer;
+}
+
+/* MAIN CARD */
 .container {
-  max-width:720px;
-  margin:80px auto;
-  padding:30px;
-  background: rgba(2,6,23,0.6);
-  border-radius:20px;
-  text-align:center;
-  box-shadow:0 20px 80px rgba(0,0,0,0.7);
+  max-width: 720px;
+  margin: 80px auto;
+  padding: 30px;
+  text-align: center;
+  border-radius: 20px;
+  background: rgba(2,6,23,0.7);
 }
 
 body.light .container {
-  background:white;
-  box-shadow:0 10px 40px rgba(0,0,0,0.08);
+  background: white;
 }
 
 /* DROPZONE */
 #dropzone {
-  height:180px;
-  border:2px dashed rgba(148,163,184,0.3);
-  border-radius:18px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  position:relative;
-  overflow:hidden;
+  height: 180px;
+  border: 2px dashed #64748b;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  transition: 0.2s;
 }
 
-body.light #dropzone {
-  background:#f1f5f9;
+body:not(.light) #dropzone.hover {
+  border-color: #22c55e;
+  box-shadow: 0 0 25px rgba(34,197,94,0.4);
 }
-
-#dropGlow {
-  position:absolute;
-  width:200px;
-  height:200px;
-  background: radial-gradient(circle, rgba(34,197,94,0.25), transparent 70%);
-  pointer-events:none;
-  transform:translate(-50%,-50%);
-  opacity:0;
-}
-
-#dropzone:hover #dropGlow { opacity:1; }
 
 /* FILE CARD */
-.file-card {
-  margin-top:12px;
-  display:flex;
-  gap:10px;
-  align-items:center;
-  padding:12px;
-  border-radius:12px;
+#fileCard {
+  display: none;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 10px;
   background: rgba(255,255,255,0.05);
 }
 
-body.light .file-card {
-  background:#f1f5f9;
+body.light #fileCard {
+  background: #e2e8f0;
 }
-
-.file-check { color:#22c55e; }
 
 /* BUTTONS */
-.buttons {
-  margin-top:10px;
-  display:flex;
-  justify-content:center;
-  gap:10px;
-}
-
 button {
-  padding:10px 16px;
-  border:none;
-  border-radius:10px;
-  background:linear-gradient(135deg,#3b82f6,#6366f1);
-  color:white;
-  cursor:pointer;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  margin: 5px;
+  cursor: pointer;
 }
 
 button:disabled {
-  background:#1e293b;
-  color:#64748b;
+  background: gray;
 }
 
 /* STATUS */
-#status { margin-top:15px; }
+#status {
+  margin-top: 10px;
+  font-size: 14px;
+}
 
 /* PROGRESS */
 #progressBar {
-  width:100%;
-  height:8px;
-  background:rgba(255,255,255,0.05);
-  border-radius:10px;
-  margin-top:10px;
-  overflow:hidden;
-}
-
-#progressFill {
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#22c55e,#4ade80);
+  height: 6px;
+  width: 0%;
+  background: #22c55e;
+  border-radius: 10px;
+  margin-top: 10px;
+  transition: width 0.3s;
 }
 
 /* OUTPUT */
 #output {
-  margin-top:20px;
-  padding:15px;
-  border-radius:12px;
-  background: rgba(2,6,23,0.8);
-  max-height:250px;
-  overflow:auto;
-  font-size:12px;
-  text-align:left;
-  white-space:pre-wrap;
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 10px;
+  max-height: 250px;
+  overflow: auto;
+  background: rgba(0,0,0,0.4);
 }
 
 body.light #output {
-  background:#f8fafc;
+  background: #e2e8f0;
 }
-
-input[type=file] { display:none; }
-
 </style>
 </head>
+
 <body>
 
 <div class="navbar">
   <div class="logo">NO-risk</div>
-  <div class="nav-links">
-    <button id="themeToggle" onclick="toggleTheme()">🌙</button>
-    <a href="#" onclick="openUpload()">Upload</a>
-    <a href="https://github.com/goat-67/NO-risk#readme" target="_blank">About</a>
-  </div>
+  <div class="toggle" onclick="toggleMode()">🌓</div>
 </div>
 
 <div class="container">
   <h1>File → JSON / Markdown</h1>
-  <p>Upload CSV or Excel and convert instantly</p>
 
-  <div id="dropzone">
-    <div id="dropGlow"></div>
-    <div>
-      📂<br>
-      Drag & drop file<br>
-      <small>or click</small>
-    </div>
-  </div>
+  <div id="dropzone">Drag & Drop File</div>
+  <input type="file" id="fileInput" hidden>
 
-  <div id="fileCard" style="display:none;">
-    <div class="file-card">
-      📄
-      <div>
-        <div id="fileName"></div>
-        <div id="fileMeta" style="font-size:12px;"></div>
-      </div>
-      <div class="file-check">✓</div>
-    </div>
-  </div>
+  <div id="fileCard"></div>
 
-  <input type="file" id="fileInput" accept=".csv,.xlsx">
-
-  <div class="buttons">
+  <div>
     <button onclick="openUpload()">Upload File</button>
     <button id="downloadJsonBtn" disabled>Download JSON</button>
     <button id="convertMdBtn" disabled>Convert to MD</button>
     <button id="downloadMdBtn" disabled>Download MD</button>
   </div>
 
-  <div id="status">Waiting for file...</div>
-  <div id="progressBar"><div id="progressFill"></div></div>
-
+  <div id="status">Waiting...</div>
+  <div id="progressBar"></div>
   <div id="output"></div>
 </div>
 
 <script>
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
-const status = document.getElementById("status");
 const output = document.getElementById("output");
-const progressFill = document.getElementById("progressFill");
+const status = document.getElementById("status");
+const progress = document.getElementById("progressBar");
+const fileCard = document.getElementById("fileCard");
 
-let fullData=null;
-let markdownData=null;
+let fullData = null;
+let markdownData = null;
 
-/* THEME */
-function toggleTheme(){
+/* MODE TOGGLE */
+function toggleMode() {
   document.body.classList.toggle("light");
 }
 
+/* OPEN FILE */
+function openUpload() {
+  fileInput.click();
+}
+
+/* RESET UI */
+function resetUI() {
+  output.textContent = "";
+  status.textContent = "Waiting...";
+  progress.style.width = "0%";
+  fileCard.style.display = "none";
+  fullData = null;
+
+  document.getElementById("downloadJsonBtn").disabled = true;
+  document.getElementById("convertMdBtn").disabled = true;
+  document.getElementById("downloadMdBtn").disabled = true;
+}
+
 /* FILE SELECT */
-function openUpload(){ fileInput.click(); }
-
-dropzone.onclick=()=>fileInput.click();
-
-fileInput.addEventListener("change",()=>handleFile(fileInput.files[0]));
-
-/* DRAG */
-dropzone.addEventListener("dragover",(e)=>{
-  e.preventDefault();
+fileInput.addEventListener("change", () => {
+  resetUI();
+  handleFile(fileInput.files[0]);
 });
 
-dropzone.addEventListener("drop",(e)=>{
+/* DRAG */
+dropzone.addEventListener("dragover", e => {
   e.preventDefault();
+  dropzone.classList.add("hover");
+});
+
+dropzone.addEventListener("dragleave", () => {
+  dropzone.classList.remove("hover");
+});
+
+dropzone.addEventListener("drop", e => {
+  e.preventDefault();
+  dropzone.classList.remove("hover");
+  resetUI();
   handleFile(e.dataTransfer.files[0]);
 });
 
-/* GLOW FOLLOW */
-const glow=document.getElementById("dropGlow");
-dropzone.addEventListener("mousemove",(e)=>{
-  const r=dropzone.getBoundingClientRect();
-  glow.style.left=(e.clientX-r.left)+"px";
-  glow.style.top=(e.clientY-r.top)+"px";
-});
-
 /* HANDLE FILE */
-async function handleFile(file){
-  if(!file) return;
+async function handleFile(file) {
+  if (!file) return;
 
-  document.getElementById("fileCard").style.display="block";
-  document.getElementById("fileName").textContent=file.name;
-  document.getElementById("fileMeta").textContent=(file.size/1024).toFixed(1)+" KB";
+  fileCard.style.display = "block";
+  fileCard.textContent = file.name;
 
-  status.innerHTML="⏳ Processing...";
-  progressFill.style.width="0%";
+  status.textContent = "Uploading...";
+  progress.style.width = "40%";
 
-  const formData=new FormData();
-  formData.append("file",file);
+  const formData = new FormData();
+  formData.append("file", file);
 
-  const xhr=new XMLHttpRequest();
-  xhr.open("POST","https://no-risk-gkhr.onrender.com/upload");
+  try {
+    const res = await fetch("https://no-risk-gkhr.onrender.com/upload", {
+      method: "POST",
+      body: formData
+    });
 
-  xhr.setRequestHeader("x-api-key","Yp3!Rf8@Qx6#Lm1$Nz9^Ta5&Kc2*Hb7Ud4Vg0WeJk8SxPqR6tM3nB5C7dF9h");
-  xhr.setRequestHeader("x-internal-secret","Zk7$Qv9!Lm2#Xr5@Tp8^Wd3*Ns6&Hy1AaB4cD7eF0gHjK9mPqR2sT5uV8wXyZ");
+    const data = await res.json();
+    progress.style.width = "80%";
 
-  xhr.upload.onprogress=(e)=>{
-    if(e.lengthComputable){
-      progressFill.style.width=(e.loaded/e.total*100)+"%";
-    }
-  };
-
-  xhr.onload=()=>{
-    const data=JSON.parse(xhr.responseText);
-
-    if(xhr.status!==200){
-      status.innerHTML="❌ "+(data.detail||"Error");
+    if (!res.ok) {
+      status.textContent = "❌ " + data.detail;
+      progress.style.width = "0%";
       return;
     }
 
-    fullData=data.preview;
-    output.textContent=JSON.stringify(data.preview,null,2);
+    /* SUCCESS ONLY HERE */
+    fullData = data.preview;
+    output.textContent = JSON.stringify(data.preview, null, 2);
 
-    status.innerHTML="✅ Passed all checks";
-    progressFill.style.width="100%";
+    status.textContent = "✅ Passed all checks";
+    progress.style.width = "100%";
 
-    document.getElementById("downloadJsonBtn").disabled=false;
-    document.getElementById("convertMdBtn").disabled=false;
-  };
+    document.getElementById("downloadJsonBtn").disabled = false;
+    document.getElementById("convertMdBtn").disabled = false;
 
-  xhr.send(formData);
+  } catch {
+    status.textContent = "❌ Connection failed";
+    progress.style.width = "0%";
+  }
 }
 
-/* DOWNLOAD */
-document.getElementById("downloadJsonBtn").onclick=()=>{
-  const blob=new Blob([JSON.stringify(fullData,null,2)]);
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="data.json";
+/* DOWNLOAD JSON */
+downloadJsonBtn.onclick = () => {
+  const blob = new Blob([JSON.stringify(fullData)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "file.json";
   a.click();
 };
 
-document.getElementById("convertMdBtn").onclick=()=>{
-  const keys=Object.keys(fullData[0]);
-  let md="| "+keys.join(" | ")+" |\n";
-  md+="| "+keys.map(()=> "---").join(" | ")+" |\n";
-  fullData.forEach(r=>{
-    md+="| "+keys.map(k=>r[k]||"").join(" | ")+" |\n";
+/* CONVERT MD */
+convertMdBtn.onclick = () => {
+  const keys = Object.keys(fullData[0]);
+  let md = "| " + keys.join(" | ") + " |\n";
+  md += "| " + keys.map(() => "---").join(" | ") + " |\n";
+
+  fullData.forEach(r => {
+    md += "| " + keys.map(k => r[k]).join(" | ") + " |\n";
   });
-  markdownData=md;
-  output.textContent=md;
-  document.getElementById("downloadMdBtn").disabled=false;
+
+  markdownData = md;
+  output.textContent = md;
+
+  document.getElementById("downloadMdBtn").disabled = false;
 };
 
-document.getElementById("downloadMdBtn").onclick=()=>{
-  const blob=new Blob([markdownData]);
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="data.md";
+/* DOWNLOAD MD */
+downloadMdBtn.onclick = () => {
+  const blob = new Blob([markdownData], {type:"text/markdown"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "file.md";
   a.click();
 };
 </script>
 
 </body>
 </html>
-
