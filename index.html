@@ -42,6 +42,7 @@ body.glass::before {
   justify-content: space-between;
   align-items: center;
   background: rgba(2,6,23,0.7);
+   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
    backdrop-filter: blur(10px);
 }
 
@@ -183,20 +184,27 @@ button:disabled {
   box-shadow: none;
 }
   
-/* LIGHT MODE UPGRADE */
+/* LIGHT MODE GLOW UPGRADE */
 body.light {
   background:
-    radial-gradient(circle at top, #ffffff, #e2e8f0);
+    radial-gradient(circle at 20% 0%, #ffffff, #e2e8f0 60%, #cbd5e1);
 }
 
+/* CARD POP */
 body.light .container {
   background: white;
 
-  border: 1px solid #e2e8f0;
-
   box-shadow:
-    0 15px 40px rgba(0,0,0,0.08),
-    0 2px 6px rgba(0,0,0,0.04);
+    0 25px 60px rgba(0,0,0,0.12),
+    0 5px 15px rgba(0,0,0,0.06);
+
+  transform: translateY(0);
+  transition: 0.25s;
+}
+
+/* subtle float */
+body.light .container:hover {
+  transform: translateY(-4px);
 }
 /* STATUS */
 #status {
