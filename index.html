@@ -20,16 +20,27 @@ body.light {
   color: #0f172a;
 }
 
+/* GLASS MODE */
+body.glass {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+}
+
 /* NAVBAR */
 .navbar {
   padding: 16px 28px;
   display: flex;
   justify-content: space-between;
   background: rgba(2,6,23,0.7);
+  backdrop-filter: blur(8px);
 }
 
 body.light .navbar {
   background: white;
+}
+
+body.glass .navbar {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
 }
 
 .logo {
@@ -37,8 +48,9 @@ body.light .navbar {
   font-weight: 600;
 }
 
-.toggle {
-  cursor: pointer;
+/* MODE BUTTONS */
+.mode-buttons button {
+  margin-left: 5px;
 }
 
 /* MAIN CARD */
@@ -49,10 +61,16 @@ body.light .navbar {
   text-align: center;
   border-radius: 20px;
   background: rgba(2,6,23,0.7);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
 }
 
 body.light .container {
   background: white;
+}
+
+body.glass .container {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(16px);
 }
 
 /* DROPZONE */
@@ -64,12 +82,13 @@ body.light .container {
   align-items: center;
   justify-content: center;
   margin-bottom: 15px;
-  transition: 0.2s;
+  transition: 0.25s;
 }
 
-body:not(.light) #dropzone.hover {
+#dropzone.hover {
   border-color: #22c55e;
-  box-shadow: 0 0 25px rgba(34,197,94,0.4);
+  box-shadow: 0 0 30px rgba(34,197,94,0.5);
+  transform: scale(1.02);
 }
 
 /* FILE CARD */
@@ -94,10 +113,30 @@ button {
   color: white;
   margin: 5px;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37,99,235,0.5);
+}
+
+body.light button:hover {
+  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+
+body.glass button {
+  background: rgba(59,130,246,0.3);
+  backdrop-filter: blur(10px);
+}
+
+body.glass button:hover {
+  background: rgba(59,130,246,0.5);
 }
 
 button:disabled {
   background: gray;
+  cursor: not-allowed;
 }
 
 /* STATUS */
@@ -113,7 +152,7 @@ button:disabled {
   background: #22c55e;
   border-radius: 10px;
   margin-top: 10px;
-  transition: width 0.3s;
+  transition: width 0.3s ease;
 }
 
 /* OUTPUT */
@@ -136,7 +175,12 @@ body.light #output {
 
 <div class="navbar">
   <div class="logo">NO-risk</div>
-  <div class="toggle" onclick="toggleMode()">🌓</div>
+
+  <div class="mode-buttons">
+    <button onclick="setMode('dark')">🌙</button>
+    <button onclick="setMode('light')">☀️</button>
+    <button onclick="setMode('glass')">🧊</button>
+  </div>
 </div>
 
 <div class="container">
@@ -170,10 +214,14 @@ const fileCard = document.getElementById("fileCard");
 let fullData = null;
 let markdownData = null;
 
-/* MODE TOGGLE */
-function toggleMode() {
-  document.body.classList.toggle("light");
+/* MODE SYSTEM */
+function setMode(mode) {
+  document.body.classList.remove("light", "glass");
+  if (mode !== "dark") document.body.classList.add(mode);
+  localStorage.setItem("mode", mode);
 }
+
+setMode(localStorage.getItem("mode") || "dark");
 
 /* OPEN FILE */
 function openUpload() {
@@ -187,10 +235,11 @@ function resetUI() {
   progress.style.width = "0%";
   fileCard.style.display = "none";
   fullData = null;
+  markdownData = null;
 
-  document.getElementById("downloadJsonBtn").disabled = true;
-  document.getElementById("convertMdBtn").disabled = true;
-  document.getElementById("downloadMdBtn").disabled = true;
+  downloadJsonBtn.disabled = true;
+  convertMdBtn.disabled = true;
+  downloadMdBtn.disabled = true;
 }
 
 /* FILE SELECT */
@@ -221,10 +270,10 @@ async function handleFile(file) {
   if (!file) return;
 
   fileCard.style.display = "block";
-  fileCard.textContent = file.name;
+  fileCard.textContent = "📄 " + file.name;
 
   status.textContent = "Uploading...";
-  progress.style.width = "40%";
+  progress.style.width = "30%";
 
   const formData = new FormData();
   formData.append("file", file);
@@ -232,27 +281,30 @@ async function handleFile(file) {
   try {
     const res = await fetch("https://no-risk-gkhr.onrender.com/upload", {
       method: "POST",
+      headers: {
+        "x-api-key": "YOUR_API_KEY",
+        "x-internal-secret": "YOUR_SECRET"
+      },
       body: formData
     });
 
     const data = await res.json();
-    progress.style.width = "80%";
+    progress.style.width = "70%";
 
     if (!res.ok) {
-      status.textContent = "❌ " + data.detail;
+      status.textContent = "❌ " + (data.detail || "Upload failed");
       progress.style.width = "0%";
       return;
     }
 
-    /* SUCCESS ONLY HERE */
     fullData = data.preview;
     output.textContent = JSON.stringify(data.preview, null, 2);
 
     status.textContent = "✅ Passed all checks";
     progress.style.width = "100%";
 
-    document.getElementById("downloadJsonBtn").disabled = false;
-    document.getElementById("convertMdBtn").disabled = false;
+    downloadJsonBtn.disabled = false;
+    convertMdBtn.disabled = false;
 
   } catch {
     status.textContent = "❌ Connection failed";
@@ -262,7 +314,7 @@ async function handleFile(file) {
 
 /* DOWNLOAD JSON */
 downloadJsonBtn.onclick = () => {
-  const blob = new Blob([JSON.stringify(fullData)], {type:"application/json"});
+  const blob = new Blob([JSON.stringify(fullData, null, 2)], {type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "file.json";
@@ -276,13 +328,12 @@ convertMdBtn.onclick = () => {
   md += "| " + keys.map(() => "---").join(" | ") + " |\n";
 
   fullData.forEach(r => {
-    md += "| " + keys.map(k => r[k]).join(" | ") + " |\n";
+    md += "| " + keys.map(k => r[k] ?? "").join(" | ") + " |\n";
   });
 
   markdownData = md;
   output.textContent = md;
-
-  document.getElementById("downloadMdBtn").disabled = false;
+  downloadMdBtn.disabled = false;
 };
 
 /* DOWNLOAD MD */
