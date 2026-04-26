@@ -20,9 +20,19 @@ body.light {
   color: #0f172a;
 }
 
-/* GLASS MODE */
+/* GLASS MODE BACKGROUND */
 body.glass {
-  background: linear-gradient(135deg, #1e293b, #0f172a);
+  background: linear-gradient(120deg, #1e3a8a, #0f172a, #1e293b);
+}
+
+body.glass::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(59,130,246,0.3), transparent),
+    radial-gradient(circle at 80% 80%, rgba(34,197,94,0.2), transparent);
+  z-index: -1;
 }
 
 /* NAVBAR */
@@ -30,17 +40,16 @@ body.glass {
   padding: 16px 28px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   background: rgba(2,6,23,0.7);
-  backdrop-filter: blur(8px);
 }
 
-body.light .navbar {
-  background: white;
-}
+body.light .navbar { background: white; }
 
 body.glass .navbar {
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .logo {
@@ -48,9 +57,18 @@ body.glass .navbar {
   font-weight: 600;
 }
 
-/* MODE BUTTONS */
-.mode-buttons button {
-  margin-left: 5px;
+.nav-links a {
+  margin-left: 12px;
+  text-decoration: none;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.nav-links a:hover { opacity: 1; }
+
+.toggle {
+  cursor: pointer;
+  margin-left: 10px;
 }
 
 /* MAIN CARD */
@@ -61,7 +79,7 @@ body.glass .navbar {
   text-align: center;
   border-radius: 20px;
   background: rgba(2,6,23,0.7);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
 body.light .container {
@@ -69,8 +87,12 @@ body.light .container {
 }
 
 body.glass .container {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(16px);
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
 /* DROPZONE */
@@ -82,13 +104,17 @@ body.glass .container {
   align-items: center;
   justify-content: center;
   margin-bottom: 15px;
-  transition: 0.25s;
+  transition: 0.2s;
 }
 
 #dropzone.hover {
   border-color: #22c55e;
-  box-shadow: 0 0 30px rgba(34,197,94,0.5);
+  box-shadow: 0 0 25px rgba(34,197,94,0.4);
   transform: scale(1.02);
+}
+
+body.glass #dropzone {
+  background: rgba(255,255,255,0.05);
 }
 
 /* FILE CARD */
@@ -100,9 +126,7 @@ body.glass .container {
   background: rgba(255,255,255,0.05);
 }
 
-body.light #fileCard {
-  background: #e2e8f0;
-}
+body.light #fileCard { background: #e2e8f0; }
 
 /* BUTTONS */
 button {
@@ -118,25 +142,13 @@ button {
 
 button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(37,99,235,0.5);
-}
-
-body.light button:hover {
-  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-}
-
-body.glass button {
-  background: rgba(59,130,246,0.3);
-  backdrop-filter: blur(10px);
-}
-
-body.glass button:hover {
-  background: rgba(59,130,246,0.5);
+  box-shadow: 0 8px 20px rgba(59,130,246,0.5);
 }
 
 button:disabled {
   background: gray;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* STATUS */
@@ -152,7 +164,7 @@ button:disabled {
   background: #22c55e;
   border-radius: 10px;
   margin-top: 10px;
-  transition: width 0.3s ease;
+  transition: width 0.3s;
 }
 
 /* OUTPUT */
@@ -176,15 +188,19 @@ body.light #output {
 <div class="navbar">
   <div class="logo">NO-risk</div>
 
-  <div class="mode-buttons">
-    <button onclick="setMode('dark')">🌙</button>
-    <button onclick="setMode('light')">☀️</button>
-    <button onclick="setMode('glass')">🧊</button>
+  <div class="nav-links">
+    <a href="#" onclick="openUpload()">Upload</a>
+    <a href="https://github.com/goat-67/NO-risk#readme" target="_blank">About</a>
+
+    <span class="toggle" onclick="setMode('dark')">🌙</span>
+    <span class="toggle" onclick="setMode('light')">☀️</span>
+    <span class="toggle" onclick="setMode('glass')">🧊</span>
   </div>
 </div>
 
 <div class="container">
   <h1>File → JSON / Markdown</h1>
+  <p>Upload CSV or Excel and convert instantly</p>
 
   <div id="dropzone">Drag & Drop File</div>
   <input type="file" id="fileInput" hidden>
@@ -211,17 +227,18 @@ const status = document.getElementById("status");
 const progress = document.getElementById("progressBar");
 const fileCard = document.getElementById("fileCard");
 
+const downloadJsonBtn = document.getElementById("downloadJsonBtn");
+const convertMdBtn = document.getElementById("convertMdBtn");
+const downloadMdBtn = document.getElementById("downloadMdBtn");
+
 let fullData = null;
 let markdownData = null;
 
-/* MODE SYSTEM */
+/* MODE SWITCH */
 function setMode(mode) {
   document.body.classList.remove("light", "glass");
   if (mode !== "dark") document.body.classList.add(mode);
-  localStorage.setItem("mode", mode);
 }
-
-setMode(localStorage.getItem("mode") || "dark");
 
 /* OPEN FILE */
 function openUpload() {
@@ -270,10 +287,10 @@ async function handleFile(file) {
   if (!file) return;
 
   fileCard.style.display = "block";
-  fileCard.textContent = "📄 " + file.name;
+  fileCard.textContent = file.name;
 
   status.textContent = "Uploading...";
-  progress.style.width = "30%";
+  progress.style.width = "40%";
 
   const formData = new FormData();
   formData.append("file", file);
@@ -281,15 +298,11 @@ async function handleFile(file) {
   try {
     const res = await fetch("https://no-risk-gkhr.onrender.com/upload", {
       method: "POST",
-      headers: {
-        "x-api-key": "YOUR_API_KEY",
-        "x-internal-secret": "YOUR_SECRET"
-      },
       body: formData
     });
 
     const data = await res.json();
-    progress.style.width = "70%";
+    progress.style.width = "80%";
 
     if (!res.ok) {
       status.textContent = "❌ " + (data.detail || "Upload failed");
@@ -314,7 +327,7 @@ async function handleFile(file) {
 
 /* DOWNLOAD JSON */
 downloadJsonBtn.onclick = () => {
-  const blob = new Blob([JSON.stringify(fullData, null, 2)], {type:"application/json"});
+  const blob = new Blob([JSON.stringify(fullData)], {type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "file.json";
@@ -328,11 +341,12 @@ convertMdBtn.onclick = () => {
   md += "| " + keys.map(() => "---").join(" | ") + " |\n";
 
   fullData.forEach(r => {
-    md += "| " + keys.map(k => r[k] ?? "").join(" | ") + " |\n";
+    md += "| " + keys.map(k => r[k]).join(" | ") + " |\n";
   });
 
   markdownData = md;
   output.textContent = md;
+
   downloadMdBtn.disabled = false;
 };
 
