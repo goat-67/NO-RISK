@@ -1,159 +1,172 @@
-```html
+
 <!DOCTYPE html>
 <html>
 <head>
   <title>NO-risk</title>
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
   font-family: "Inter", "Segoe UI", Arial;
   background: radial-gradient(circle at top, #0f172a, #020617);
   color: #e2e8f0;
-  overflow-x: hidden;
+}
+
+/* LIGHT MODE */
+body.light {
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 /* NAVBAR */
 .navbar {
-  width: 100%;
   padding: 16px 28px;
-  background: rgba(2, 6, 23, 0.7);
+  background: rgba(2,6,23,0.7);
   backdrop-filter: blur(12px);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
-.logo {
-  font-size: 18px;
-  font-weight: 600;
-  color: #60a5fa;
+.logo { color:#60a5fa; font-weight:600; }
+
+.nav-links {
+  display:flex;
+  gap:15px;
+  align-items:center;
 }
 
-/* MAIN CARD */
+#themeToggle {
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:16px;
+  color:#94a3b8;
+}
+
+/* MAIN */
 .container {
-  max-width: 720px;
-  margin: 80px auto;
-  padding: 30px;
-  text-align: center;
+  max-width:720px;
+  margin:80px auto;
+  padding:30px;
   background: rgba(2,6,23,0.6);
-  border-radius: 20px;
-  position: relative;
-  border: 1px solid rgba(255,255,255,0.05);
-  box-shadow: 0 20px 80px rgba(0,0,0,0.7);
+  border-radius:20px;
+  text-align:center;
+  box-shadow:0 20px 80px rgba(0,0,0,0.7);
 }
 
-.container::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  background: radial-gradient(circle, rgba(59,130,246,0.25), transparent 70%);
-  filter: blur(50px);
-  z-index: -1;
-}
-
-/* TITLE */
-h1 {
-  font-size: 30px;
-  margin-bottom: 8px;
-}
-
-p {
-  color: #94a3b8;
-  margin-bottom: 30px;
+body.light .container {
+  background:white;
+  box-shadow:0 10px 40px rgba(0,0,0,0.08);
 }
 
 /* DROPZONE */
 #dropzone {
-  width: 100%;
-  height: 180px;
-  border: 2px dashed rgba(148,163,184,0.3);
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 15px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  position: relative;
-  overflow: hidden;
+  height:180px;
+  border:2px dashed rgba(148,163,184,0.3);
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
 }
 
-#dropzone::after {
-  content: "";
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(34,197,94,0.15), transparent 60%);
-  opacity: 0;
-  transition: 0.3s;
+body.light #dropzone {
+  background:#f1f5f9;
 }
 
-#dropzone.hover::after {
-  opacity: 1;
+#dropGlow {
+  position:absolute;
+  width:200px;
+  height:200px;
+  background: radial-gradient(circle, rgba(34,197,94,0.25), transparent 70%);
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  opacity:0;
 }
 
-#dropzone.hover {
-  border-color: #22c55e;
-  transform: scale(1.02);
+#dropzone:hover #dropGlow { opacity:1; }
+
+/* FILE CARD */
+.file-card {
+  margin-top:12px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding:12px;
+  border-radius:12px;
+  background: rgba(255,255,255,0.05);
 }
+
+body.light .file-card {
+  background:#f1f5f9;
+}
+
+.file-check { color:#22c55e; }
 
 /* BUTTONS */
 .buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
+  margin-top:10px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
 }
 
 button {
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
-  color: white;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(59,130,246,0.6);
+  padding:10px 16px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#3b82f6,#6366f1);
+  color:white;
+  cursor:pointer;
 }
 
 button:disabled {
-  background: #1e293b;
-  color: #64748b;
-  box-shadow: none;
+  background:#1e293b;
+  color:#64748b;
 }
 
 /* STATUS */
-#status {
-  margin-top: 18px;
-  font-size: 14px;
+#status { margin-top:15px; }
+
+/* PROGRESS */
+#progressBar {
+  width:100%;
+  height:8px;
+  background:rgba(255,255,255,0.05);
+  border-radius:10px;
+  margin-top:10px;
+  overflow:hidden;
+}
+
+#progressFill {
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#22c55e,#4ade80);
 }
 
 /* OUTPUT */
 #output {
-  margin-top: 20px;
+  margin-top:20px;
+  padding:15px;
+  border-radius:12px;
   background: rgba(2,6,23,0.8);
-  border-radius: 14px;
-  padding: 15px;
-  max-height: 250px;
-  overflow: auto;
-  text-align: left;
-  font-size: 12px;
-  white-space: pre-wrap;
+  max-height:250px;
+  overflow:auto;
+  font-size:12px;
+  text-align:left;
+  white-space:pre-wrap;
 }
 
-/* HIDE INPUT */
-input[type="file"] {
-  display: none;
+body.light #output {
+  background:#f8fafc;
 }
+
+input[type=file] { display:none; }
+
 </style>
 </head>
 <body>
@@ -161,6 +174,7 @@ input[type="file"] {
 <div class="navbar">
   <div class="logo">NO-risk</div>
   <div class="nav-links">
+    <button id="themeToggle" onclick="toggleTheme()">🌙</button>
     <a href="#" onclick="openUpload()">Upload</a>
     <a href="https://github.com/goat-67/NO-risk#readme" target="_blank">About</a>
   </div>
@@ -171,14 +185,26 @@ input[type="file"] {
   <p>Upload CSV or Excel and convert instantly</p>
 
   <div id="dropzone">
+    <div id="dropGlow"></div>
     <div>
-      <div style="font-size:40px;">📂</div>
-      <div style="margin-top:10px;">Drag & drop file</div>
-      <div style="font-size:12px;color:#64748b;">or click to upload</div>
+      📂<br>
+      Drag & drop file<br>
+      <small>or click</small>
     </div>
   </div>
 
-  <input type="file" id="fileInput" accept=".xlsx,.csv">
+  <div id="fileCard" style="display:none;">
+    <div class="file-card">
+      📄
+      <div>
+        <div id="fileName"></div>
+        <div id="fileMeta" style="font-size:12px;"></div>
+      </div>
+      <div class="file-check">✓</div>
+    </div>
+  </div>
+
+  <input type="file" id="fileInput" accept=".csv,.xlsx">
 
   <div class="buttons">
     <button onclick="openUpload()">Upload File</button>
@@ -188,159 +214,128 @@ input[type="file"] {
   </div>
 
   <div id="status">Waiting for file...</div>
+  <div id="progressBar"><div id="progressFill"></div></div>
+
   <div id="output"></div>
 </div>
 
 <script>
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
-const output = document.getElementById("output");
 const status = document.getElementById("status");
+const output = document.getElementById("output");
+const progressFill = document.getElementById("progressFill");
 
-const downloadJsonBtn = document.getElementById("downloadJsonBtn");
-const convertMdBtn = document.getElementById("convertMdBtn");
-const downloadMdBtn = document.getElementById("downloadMdBtn");
+let fullData=null;
+let markdownData=null;
 
-let fullData = null;
-let markdownData = null;
-
-function openUpload() {
-  fileInput.click();
+/* THEME */
+function toggleTheme(){
+  document.body.classList.toggle("light");
 }
 
-dropzone.onclick = () => fileInput.click();
+/* FILE SELECT */
+function openUpload(){ fileInput.click(); }
 
-fileInput.addEventListener("change", () => {
-  handleFile(fileInput.files[0]);
-});
+dropzone.onclick=()=>fileInput.click();
 
-dropzone.addEventListener("dragover", (e) => {
+fileInput.addEventListener("change",()=>handleFile(fileInput.files[0]));
+
+/* DRAG */
+dropzone.addEventListener("dragover",(e)=>{
   e.preventDefault();
-  dropzone.classList.add("hover");
 });
 
-dropzone.addEventListener("dragleave", () => {
-  dropzone.classList.remove("hover");
-});
-
-dropzone.addEventListener("drop", (e) => {
+dropzone.addEventListener("drop",(e)=>{
   e.preventDefault();
-  dropzone.classList.remove("hover");
   handleFile(e.dataTransfer.files[0]);
 });
 
-async function handleFile(file) {
-  if (!file) return;
+/* GLOW FOLLOW */
+const glow=document.getElementById("dropGlow");
+dropzone.addEventListener("mousemove",(e)=>{
+  const r=dropzone.getBoundingClientRect();
+  glow.style.left=(e.clientX-r.left)+"px";
+  glow.style.top=(e.clientY-r.top)+"px";
+});
 
-  const name = file.name.toLowerCase();
+/* HANDLE FILE */
+async function handleFile(file){
+  if(!file) return;
 
-  if (!(name.endsWith(".xlsx") || name.endsWith(".csv"))) {
-    status.innerHTML = "❌ <b>Only CSV or Excel files allowed</b>";
-    status.style.color = "#ef4444";
-    return;
-  }
+  document.getElementById("fileCard").style.display="block";
+  document.getElementById("fileName").textContent=file.name;
+  document.getElementById("fileMeta").textContent=(file.size/1024).toFixed(1)+" KB";
 
-  status.innerHTML = "⏳ <b>Processing file...</b>";
-  status.style.color = "#facc15";
+  status.innerHTML="⏳ Processing...";
+  progressFill.style.width="0%";
 
-  output.textContent = "";
+  const formData=new FormData();
+  formData.append("file",file);
 
-  downloadJsonBtn.disabled = true;
-  convertMdBtn.disabled = true;
-  downloadMdBtn.disabled = true;
+  const xhr=new XMLHttpRequest();
+  xhr.open("POST","https://no-risk-gkhr.onrender.com/upload");
 
-  const formData = new FormData();
-  formData.append("file", file);
+  xhr.setRequestHeader("x-api-key","Yp3!Rf8@Qx6#Lm1$Nz9^Ta5&Kc2*Hb7Ud4Vg0WeJk8SxPqR6tM3nB5C7dF9h");
+  xhr.setRequestHeader("x-internal-secret","Zk7$Qv9!Lm2#Xr5@Tp8^Wd3*Ns6&Hy1AaB4cD7eF0gHjK9mPqR2sT5uV8wXyZ");
 
-  try {
-    const res = await fetch("https://no-risk-gkhr.onrender.com/upload", {
-      method: "POST",
-      headers: {
-        "x-api-key": "Yp3!Rf8@Qx6#Lm1$Nz9^Ta5&Kc2*Hb7Ud4Vg0WeJk8SxPqR6tM3nB5C7dF9h",
-        "x-internal-secret": "Zk7$Qv9!Lm2#Xr5@Tp8^Wd3*Ns6&Hy1AaB4cD7eF0gHjK9mPqR2sT5uV8wXyZ"
-      },
-      body: formData
-    });
+  xhr.upload.onprogress=(e)=>{
+    if(e.lengthComputable){
+      progressFill.style.width=(e.loaded/e.total*100)+"%";
+    }
+  };
 
-    const data = await res.json();
+  xhr.onload=()=>{
+    const data=JSON.parse(xhr.responseText);
 
-    if (!res.ok) {
-      status.innerHTML = "❌ <b>" + (data.detail || "Upload failed") + "</b>";
-      status.style.color = "#ef4444";
+    if(xhr.status!==200){
+      status.innerHTML="❌ "+(data.detail||"Error");
       return;
     }
 
-    fullData = data.preview;
+    fullData=data.preview;
+    output.textContent=JSON.stringify(data.preview,null,2);
 
-    output.textContent = JSON.stringify(data.preview, null, 2);
+    status.innerHTML="✅ Passed all checks";
+    progressFill.style.width="100%";
 
-    status.innerHTML = "✅ <b>Secure • Passed all checks</b>";
-    status.style.color = "#22c55e";
+    document.getElementById("downloadJsonBtn").disabled=false;
+    document.getElementById("convertMdBtn").disabled=false;
+  };
 
-    downloadJsonBtn.disabled = false;
-    convertMdBtn.disabled = false;
-
-  } catch (err) {
-    status.innerHTML = "❌ <b>Backend connection failed</b>";
-    status.style.color = "#ef4444";
-  }
+  xhr.send(formData);
 }
 
-downloadJsonBtn.onclick = () => {
-  if (!fullData) return;
-
-  const blob = new Blob(
-    [JSON.stringify(fullData, null, 2)],
-    { type: "application/json" }
-  );
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-
-  a.href = url;
-  a.download = "converted.json";
+/* DOWNLOAD */
+document.getElementById("downloadJsonBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(fullData,null,2)]);
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="data.json";
   a.click();
-
-  URL.revokeObjectURL(url);
 };
 
-convertMdBtn.onclick = () => {
-  if (!fullData || !fullData.length) return;
-
-  const keys = Object.keys(fullData[0]);
-
-  let md = "| " + keys.join(" | ") + " |\n";
-  md += "| " + keys.map(() => "---").join(" | ") + " |\n";
-
-  fullData.forEach(row => {
-    md += "| " + keys.map(k => row[k] ?? "").join(" | ") + " |\n";
+document.getElementById("convertMdBtn").onclick=()=>{
+  const keys=Object.keys(fullData[0]);
+  let md="| "+keys.join(" | ")+" |\n";
+  md+="| "+keys.map(()=> "---").join(" | ")+" |\n";
+  fullData.forEach(r=>{
+    md+="| "+keys.map(k=>r[k]||"").join(" | ")+" |\n";
   });
-
-  markdownData = md;
-  output.textContent = md;
-
-  status.innerHTML = "✅ <b>Converted to Markdown</b>";
-  status.style.color = "#22c55e";
-
-  downloadMdBtn.disabled = false;
+  markdownData=md;
+  output.textContent=md;
+  document.getElementById("downloadMdBtn").disabled=false;
 };
 
-downloadMdBtn.onclick = () => {
-  if (!markdownData) return;
-
-  const blob = new Blob([markdownData], { type: "text/markdown" });
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-
-  a.href = url;
-  a.download = "converted.md";
+document.getElementById("downloadMdBtn").onclick=()=>{
+  const blob=new Blob([markdownData]);
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="data.md";
   a.click();
-
-  URL.revokeObjectURL(url);
 };
 </script>
 
 </body>
 </html>
-```
+
