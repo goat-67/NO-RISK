@@ -8,127 +8,58 @@
 
 body {
   margin: 0;
-  font-family: "Inter", "Segoe UI", Arial;
+  font-family: "Inter", Arial;
   background: linear-gradient(to bottom, #1e293b, #0f172a);
   color: #e2e8f0;
   transition: 0.3s;
 }
 
-/* LIGHT MODE */
+/* LIGHT */
 body.light {
-  background: #f1f5f9;
+  background: radial-gradient(circle, #ffffff, #e2e8f0);
   color: #0f172a;
 }
 
-/* GLASS MODE BACKGROUND */
+/* GLASS */
 body.glass {
-  background: linear-gradient(120deg, #1e3a8a, #0f172a, #1e293b);
+  background: linear-gradient(120deg, #1e3a8a, #0f172a);
 }
 
-body.glass::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(59,130,246,0.3), transparent),
-    radial-gradient(circle at 80% 80%, rgba(34,197,94,0.2), transparent);
-  z-index: -1;
-}
-
-/* NAVBAR */
+/* NAV */
 .navbar {
   padding: 16px 28px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   background: rgba(2,6,23,0.7);
-   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-   backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
-body.light .navbar { background: white; }
-
-body.glass .navbar {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.logo {
-  color: #60a5fa;
-  font-weight: 600;
-}
+.logo { color: #60a5fa; font-weight: 600; }
 
 .nav-links a {
   margin-left: 12px;
-  text-decoration: none;
   color: inherit;
-  opacity: 0.8;
+  text-decoration: none;
 }
 
-.nav-links a:hover { opacity: 1; }
+.toggle { cursor: pointer; margin-left: 10px; }
 
-.toggle {
-  cursor: pointer;
-  margin-left: 10px;
-}
-  #fileCard {
-  display: none;
-  padding: 12px 16px;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  background: rgba(255,255,255,0.05);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.file-icon {
-  font-size: 18px;
-  opacity: 0.8;
-}
-
-.file-name {
-  flex: 1;
-  text-align: left;
-}
-
-.file-size {
-  font-size: 12px;
-  opacity: 0.6;
-}
-
-.file-check {
-  color: #22c55e;
-  font-weight: bold;
-}
-
-/* MAIN CARD */
+/* MAIN */
 .container {
-  max-width: 720px;
+  max-width: 750px;
   margin: 80px auto;
   padding: 30px;
-  text-align: center;
   border-radius: 20px;
   background: rgba(2,6,23,0.7);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
-body.light .container {
-  background: white;
-}
-
+body.light .container { background: white; }
 body.glass .container {
   background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(255,255,255,0.15);
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.4),
-    inset 0 1px 0 rgba(255,255,255,0.2);
+  backdrop-filter: blur(15px);
 }
 
-/* DROPZONE */
+/* DROP */
 #dropzone {
   height: 180px;
   border: 2px dashed #64748b;
@@ -136,18 +67,15 @@ body.glass .container {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   margin-bottom: 15px;
   transition: 0.2s;
 }
 
 #dropzone.hover {
   border-color: #22c55e;
-  box-shadow: 0 0 25px rgba(34,197,94,0.4);
+  box-shadow: 0 0 25px rgba(34,197,94,0.5);
   transform: scale(1.02);
-}
-
-body.glass #dropzone {
-  background: rgba(255,255,255,0.05);
 }
 
 /* FILE CARD */
@@ -155,11 +83,9 @@ body.glass #dropzone {
   display: none;
   padding: 12px;
   border-radius: 12px;
-  margin-bottom: 10px;
   background: rgba(255,255,255,0.05);
+  margin-bottom: 10px;
 }
-
-body.light #fileCard { background: #e2e8f0; }
 
 /* BUTTONS */
 button {
@@ -170,46 +96,10 @@ button {
   color: white;
   margin: 5px;
   cursor: pointer;
-  transition: 0.2s;
 }
 
 button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59,130,246,0.5);
-}
-
-button:disabled {
-  background: gray;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-  
-/* LIGHT MODE GLOW UPGRADE */
-body.light {
-  background:
-    radial-gradient(circle at 20% 0%, #ffffff, #e2e8f0 60%, #cbd5e1);
-}
-
-/* CARD POP */
-body.light .container {
-  background: white;
-
-  box-shadow:
-    0 25px 60px rgba(0,0,0,0.12),
-    0 5px 15px rgba(0,0,0,0.06);
-
-  transform: translateY(0);
-  transition: 0.25s;
-}
-
-/* subtle float */
-body.light .container:hover {
-  transform: translateY(-4px);
-}
-/* STATUS */
-#status {
-  margin-top: 10px;
-  font-size: 14px;
 }
 
 /* PROGRESS */
@@ -217,9 +107,7 @@ body.light .container:hover {
   height: 6px;
   width: 0%;
   background: #22c55e;
-  border-radius: 10px;
   margin-top: 10px;
-  transition: width 0.3s;
 }
 
 /* OUTPUT */
@@ -231,26 +119,6 @@ body.light .container:hover {
   overflow: auto;
   background: rgba(0,0,0,0.4);
 }
-
-body.light #output {
-  background: #e2e8f0;
-}
-  /* DARK MODE UPGRADE */
-body:not(.light):not(.glass) {
-  background:
-    radial-gradient(circle at 20% 0%, #1e293b, transparent),
-    linear-gradient(to bottom, #0f172a, #020617);
-}
-
-body:not(.light):not(.glass) .container {
-  background: linear-gradient(145deg, #020617, #0f172a);
-
-  border: 1px solid rgba(255,255,255,0.06);
-
-  box-shadow:
-    0 25px 70px rgba(0,0,0,0.7),
-    inset 0 1px 0 rgba(255,255,255,0.05);
-}
 </style>
 </head>
 
@@ -258,10 +126,9 @@ body:not(.light):not(.glass) .container {
 
 <div class="navbar">
   <div class="logo">NO-risk</div>
-
   <div class="nav-links">
     <a href="#" onclick="openUpload()">Upload</a>
-    <a href="https://github.com/goat-67/NO-risk#readme" target="_blank">About</a>
+    <a href="about.html">About</a>
 
     <span class="toggle" onclick="setMode('dark')">🌙</span>
     <span class="toggle" onclick="setMode('light')">☀️</span>
@@ -271,15 +138,15 @@ body:not(.light):not(.glass) .container {
 
 <div class="container">
   <h1>File → JSON / Markdown</h1>
-  <p>Upload CSV or Excel and convert instantly</p>
 
-  <div id="dropzone">Drag & Drop File</div>
+  <div id="dropzone">Click or Drag File</div>
   <input type="file" id="fileInput" hidden>
 
   <div id="fileCard"></div>
 
   <div>
     <button onclick="openUpload()">Upload File</button>
+    <button id="toggleViewBtn">Switch to JSON</button>
     <button id="downloadJsonBtn" disabled>Download JSON</button>
     <button id="convertMdBtn" disabled>Convert to MD</button>
     <button id="downloadMdBtn" disabled>Download MD</button>
@@ -289,10 +156,10 @@ body:not(.light):not(.glass) .container {
   <div id="progressBar"></div>
   <div id="output"></div>
 </div>
-<script src="xlsx.full.min.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
 
+<script src="xlsx.full.min.js"></script>
+
+<script>
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
 const output = document.getElementById("output");
@@ -300,114 +167,118 @@ const status = document.getElementById("status");
 const progress = document.getElementById("progressBar");
 const fileCard = document.getElementById("fileCard");
 
+const toggleBtn = document.getElementById("toggleViewBtn");
 const downloadJsonBtn = document.getElementById("downloadJsonBtn");
 const convertMdBtn = document.getElementById("convertMdBtn");
 const downloadMdBtn = document.getElementById("downloadMdBtn");
 
 let fullData = null;
 let markdownData = null;
+let viewMode = "table";
 
-/* =========================
-   MODE SWITCH
-========================= */
-window.setMode = function(mode) {
-  document.body.classList.remove("light", "glass");
+/* MODE */
+function setMode(mode) {
+  document.body.classList.remove("light","glass");
   if (mode !== "dark") document.body.classList.add(mode);
-};
+}
 
-/* =========================
-   OPEN FILE
-========================= */
-window.openUpload = function() {
+/* OPEN */
+function openUpload() {
+  fileInput.value = "";
   fileInput.click();
-};
+}
 
-/* =========================
-   RESET UI
-========================= */
+/* RESET */
 function resetUI() {
   output.innerHTML = "";
   status.textContent = "Upload a File...";
   progress.style.width = "0%";
   fileCard.style.display = "none";
-
   fullData = null;
   markdownData = null;
-
-  downloadJsonBtn.disabled = true;
-  convertMdBtn.disabled = true;
-  downloadMdBtn.disabled = true;
 }
 
-/* =========================
-   CSV PARSER (SMART)
-========================= */
-function parseCSV(text) {
-  const rows = [];
-  const lines = text.split("\n").filter(l => l.trim());
+/* EVENTS */
+dropzone.onclick = openUpload;
 
-  const headers = lines[0].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+fileInput.addEventListener("change", () => {
+  resetUI();
+  handleFile(fileInput.files[0]);
+});
 
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-    let obj = {};
+dropzone.addEventListener("dragover", e => {
+  e.preventDefault();
+  dropzone.classList.add("hover");
+});
 
-    headers.forEach((h, j) => {
-      obj[h.replace(/"/g, "").trim()] =
-        (values[j] || "").replace(/"/g, "").trim();
+dropzone.addEventListener("dragleave", () => {
+  dropzone.classList.remove("hover");
+});
+
+dropzone.addEventListener("drop", e => {
+  e.preventDefault();
+  dropzone.classList.remove("hover");
+  resetUI();
+  handleFile(e.dataTransfer.files[0]);
+});
+
+/* HANDLE FILE */
+async function handleFile(file) {
+  if (!file) return;
+
+  fileCard.style.display = "block";
+  fileCard.innerHTML = `📄 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+
+  status.textContent = "Processing...";
+  progress.style.width = "30%";
+
+  let rows = [];
+
+  if (file.name.endsWith(".csv")) {
+    const text = await file.text();
+    const lines = text.split("\n").filter(l => l.trim());
+    const headers = lines[0].split(",");
+
+    rows = lines.slice(1).map(line => {
+      const values = line.split(",");
+      let obj = {};
+      headers.forEach((h,i)=>obj[h]=values[i]||"");
+      return obj;
     });
 
-    rows.push(obj);
+  } else if (file.name.endsWith(".xlsx")) {
+    const data = await file.arrayBuffer();
+    const wb = XLSX.read(data, {type:"array"});
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    rows = XLSX.utils.sheet_to_json(sheet);
+
+  } else {
+    status.textContent = "❌ Invalid file";
+    return;
   }
 
-  return rows;
-}
+  progress.style.width = "60%";
 
-/* =========================
-   TABLE RENDER
-========================= */
-function renderTable(data) {
-  if (!data.length) return;
-
-  const keys = Object.keys(data[0]);
-  let html = "<table style='width:100%; border-collapse: collapse;'>";
-
-  html += "<tr>";
-  keys.forEach(k => {
-    html += `<th style="padding:8px; text-align:left; border-bottom:1px solid #ccc;">${k}</th>`;
-  });
-  html += "</tr>";
-
-  data.slice(0, 20).forEach(row => {
-    html += "<tr>";
-    keys.forEach(k => {
-      html += `<td style="padding:6px; border-bottom:1px solid rgba(255,255,255,0.05);">${row[k] ?? ""}</td>`;
-    });
-    html += "</tr>";
-  });
-
-  html += "</table>";
-  output.innerHTML = html;
-}
-
-/* =========================
-   SENSITIVE CHECK
-========================= */
-function containsSSN(text) {
-  return /\b\d{3}-\d{2}-\d{4}\b/.test(text);
-}
-
-function luhnCheck(num) {
+  /* SECURITY CHECKS */
+  function ssn(t){return /\d{3}-\d{2}-\d{4}/.test(t);}
+  function script(t){return /<script/i.test(t);}
+  function html(t){return /<[^>]+>/.test(t);}
+  function sql(t){return /(select|drop|insert|delete)/i.test(t);}
+  function luhnCheck(num) {
   let sum = 0, flip = false;
+
   for (let i = num.length - 1; i >= 0; i--) {
     let n = +num[i];
+
     if (flip) {
       n *= 2;
       if (n > 9) n -= 9;
     }
+
     sum += n;
     flip = !flip;
   }
+
   return sum % 10 === 0;
 }
 
@@ -416,55 +287,12 @@ function containsCard(text) {
   return digits.length >= 13 && digits.length <= 19 && luhnCheck(digits);
 }
 
-/* =========================
-   HANDLE FILE
-========================= */
-async function handleFile(file) {
-  if (!file) return;
-
-  resetUI();
-
-  fileCard.style.display = "flex";
-  fileCard.innerHTML = `
-    <span class="file-icon">📄</span>
-    <span class="file-name">${file.name}</span>
-    <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
-    <span class="file-type">${file.name.split('.').pop().toUpperCase()}</span>
-    <span class="file-check"></span>
-  `;
-
-  status.textContent = "Processing...";
-  progress.style.width = "30%";
-
-  let rows = [];
-
-  if (file.name.toLowerCase().endsWith(".csv")) {
-    const text = await file.text();
-    rows = parseCSV(text);
-
-  } else if (file.name.toLowerCase().endsWith(".xlsx")) {
-
-    const data = await file.arrayBuffer();
-    const workbook = XLSX.read(data, { type: "array" });
-
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    rows = XLSX.utils.sheet_to_json(sheet);
-
-  } else {
-    status.textContent = "❌ Only CSV or Excel files allowed";
-    progress.style.width = "0%";
-    return;
-  }
-
-  progress.style.width = "60%";
-
   for (const row of rows) {
-    for (const key in row) {
-      const val = String(row[key]);
-
-      if (containsSSN(val) || containsCard(val)) {
-        status.textContent = "❌ Sensitive data detected";
-        progress.style.width = "0%";
+    for (const k in row) {
+      const v = String(row[k]);
+     if (ssn(v) || containsCard(v) || script(v) || html(v) || sql(v)) {
+        status.textContent = "❌ Blocked suspicious data";
+        progress.style.width="0%";
         return;
       }
     }
@@ -472,93 +300,72 @@ async function handleFile(file) {
 
   fullData = rows;
 
-  renderTable(rows);
+  render();
 
-  status.textContent = `✅ ${rows.length} rows processed`;
+  status.textContent = "✅ Passed all checks";
   progress.style.width = "100%";
-
-  fileCard.querySelector(".file-check").textContent = "✔";
 
   downloadJsonBtn.disabled = false;
   convertMdBtn.disabled = false;
 }
 
-/* =========================
-   EVENTS
-========================= */
-
-fileInput.addEventListener("change", () => {
-  handleFile(fileInput.files[0]);
-});
-
-dropzone.addEventListener("click", openUpload);
-
-dropzone.addEventListener("dragover", e => {
-  e.preventDefault();
-  dropzone.classList.add("hover");
-  dropzone.textContent = "Drop file 🚀";
-});
-
-dropzone.addEventListener("dragleave", () => {
-  dropzone.classList.remove("hover");
-  dropzone.textContent = "Drag & Drop File";
-});
-
-dropzone.addEventListener("drop", e => {
-  e.preventDefault();
-  dropzone.classList.remove("hover");
-  dropzone.textContent = "Drag & Drop File";
-  handleFile(e.dataTransfer.files[0]);
-});
-
-/* =========================
-   DOWNLOAD JSON
-========================= */
-downloadJsonBtn.onclick = () => {
+/* RENDER */
+function render() {
   if (!fullData) return;
 
-  const blob = new Blob([JSON.stringify(fullData)], {type:"application/json"});
+  if (viewMode==="table") {
+    let html = "<table style='width:100%;border-collapse:collapse'>";
+    const keys = Object.keys(fullData[0]);
+
+    html += "<tr>"+keys.map(k=>`<th>${k}</th>`).join("")+"</tr>";
+
+    fullData.slice(0,50).forEach(r=>{
+      html+="<tr>"+keys.map(k=>`<td>${r[k]||""}</td>`).join("")+"</tr>";
+    });
+
+    html+="</table>";
+    output.innerHTML = html;
+
+  } else {
+    output.textContent = JSON.stringify(fullData,null,2);
+  }
+}
+
+/* TOGGLE */
+toggleBtn.onclick = () => {
+  viewMode = viewMode==="table"?"json":"table";
+  toggleBtn.textContent = viewMode==="table"?"Switch to JSON":"Switch to Table";
+  render();
+};
+
+/* DOWNLOADS */
+downloadJsonBtn.onclick = () => {
+  const blob = new Blob([JSON.stringify(fullData)],{type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "file.json";
+  a.download="file.json";
   a.click();
 };
 
-/* =========================
-   CONVERT MD
-========================= */
 convertMdBtn.onclick = () => {
-  if (!fullData || !fullData.length) return;
-
   const keys = Object.keys(fullData[0]);
-
-  let md = "| " + keys.join(" | ") + " |\n";
-  md += "| " + keys.map(() => "---").join(" | ") + " |\n";
-
-  fullData.forEach(r => {
-    md += "| " + keys.map(k => r[k]).join(" | ") + " |\n";
+  let md = "| "+keys.join(" | ")+" |\n";
+  md += "| "+keys.map(()=> "---").join(" | ")+" |\n";
+  fullData.forEach(r=>{
+    md += "| "+keys.map(k=>r[k]||"").join(" | ")+" |\n";
   });
-
   markdownData = md;
   output.textContent = md;
-
-  downloadMdBtn.disabled = false;
+  downloadMdBtn.disabled=false;
 };
 
-/* =========================
-   DOWNLOAD MD
-========================= */
 downloadMdBtn.onclick = () => {
-  if (!markdownData) return;
-
-  const blob = new Blob([markdownData], {type:"text/markdown"});
+  const blob = new Blob([markdownData],{type:"text/markdown"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "file.md";
+  a.download="file.md";
   a.click();
 };
-
-});
 </script>
 
 </body>
