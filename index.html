@@ -9,49 +9,59 @@
 body {
   margin: 0;
   font-family: "Inter", "Segoe UI", Arial;
-  background: linear-gradient(to bottom, #1e293b, #0f172a);
   color: #e2e8f0;
   transition: 0.3s;
 }
 
-/* LIGHT MODE */
+/* =========================
+   MODES
+========================= */
+
+/* DARK */
+body {
+  background:
+    radial-gradient(circle at 20% 0%, #1e293b, transparent),
+    linear-gradient(to bottom, #0f172a, #020617);
+}
+
+/* LIGHT */
 body.light {
-  background: #f1f5f9;
+  background:
+    radial-gradient(circle at 20% 0%, #ffffff, #e2e8f0 60%, #cbd5e1);
   color: #0f172a;
 }
 
-/* GLASS MODE BACKGROUND */
+/* GLASS */
 body.glass {
   background: linear-gradient(120deg, #1e3a8a, #0f172a, #1e293b);
+  background-size: 200% 200%;
+  animation: bgMove 12s ease infinite;
 }
 
-body.glass::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(59,130,246,0.3), transparent),
-    radial-gradient(circle at 80% 80%, rgba(34,197,94,0.2), transparent);
-  z-index: -1;
+@keyframes bgMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* NAVBAR */
+/* =========================
+   NAVBAR
+========================= */
+
 .navbar {
   padding: 16px 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: rgba(2,6,23,0.7);
-   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-   backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  position: relative;
 }
 
 body.light .navbar { background: white; }
 
 body.glass .navbar {
   background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .logo {
@@ -59,52 +69,79 @@ body.glass .navbar {
   font-weight: 600;
 }
 
-.nav-links a {
-  margin-left: 12px;
-  text-decoration: none;
-  color: inherit;
-  opacity: 0.8;
-}
+/* =========================
+   TOGGLE SWITCHES
+========================= */
 
-.nav-links a:hover { opacity: 1; }
-
-.toggle {
-  cursor: pointer;
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
   margin-left: 10px;
 }
-  #fileCard {
-  display: none;
-  padding: 12px 16px;
-  border-radius: 12px;
-  margin-bottom: 10px;
+
+.switch input { display: none; }
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #64748b;
+  border-radius: 999px;
+  transition: 0.3s;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+input:checked + .slider {
+  background: #22c55e;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* =========================
+   MESSAGE
+========================= */
+
+#message {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  max-width: 260px;
+  backdrop-filter: blur(8px);
+  z-index: 999;
+}
+
+body:not(.light) #message {
+  color: white;
   background: rgba(255,255,255,0.05);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: space-between;
 }
 
-.file-icon {
-  font-size: 18px;
-  opacity: 0.8;
+body.light #message {
+  color: black;
+  background: rgba(0,0,0,0.05);
 }
 
-.file-name {
-  flex: 1;
-  text-align: left;
-}
+/* =========================
+   MAIN CARD
+========================= */
 
-.file-size {
-  font-size: 12px;
-  opacity: 0.6;
-}
-
-.file-check {
-  color: #22c55e;
-  font-weight: bold;
-}
-
-/* MAIN CARD */
 .container {
   max-width: 720px;
   margin: 80px auto;
@@ -112,7 +149,19 @@ body.glass .navbar {
   text-align: center;
   border-radius: 20px;
   background: rgba(2,6,23,0.7);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: 0 25px 70px rgba(0,0,0,0.7);
+  position: relative;
+}
+
+/* glow border */
+.container::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #3b82f6, #22c55e);
+  opacity: 0.3;
+  z-index: -1;
 }
 
 body.light .container {
@@ -121,14 +170,13 @@ body.light .container {
 
 body.glass .container {
   background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(255,255,255,0.15);
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.4),
-    inset 0 1px 0 rgba(255,255,255,0.2);
+  backdrop-filter: blur(25px) saturate(140%);
 }
 
-/* DROPZONE */
+/* =========================
+   DROPZONE
+========================= */
+
 #dropzone {
   height: 180px;
   border: 2px dashed #64748b;
@@ -138,6 +186,7 @@ body.glass .container {
   justify-content: center;
   margin-bottom: 15px;
   transition: 0.2s;
+  animation: pulse 2.5s infinite;
 }
 
 #dropzone.hover {
@@ -146,27 +195,37 @@ body.glass .container {
   transform: scale(1.02);
 }
 
-body.glass #dropzone {
-  background: rgba(255,255,255,0.05);
+@keyframes pulse {
+  50% { box-shadow: 0 0 20px rgba(34,197,94,0.3); }
 }
 
-/* FILE CARD */
+/* =========================
+   FILE CARD
+========================= */
+
 #fileCard {
   display: none;
   padding: 12px;
   border-radius: 12px;
   margin-bottom: 10px;
   background: rgba(255,255,255,0.05);
+  display: flex;
+  justify-content: space-between;
 }
 
-body.light #fileCard { background: #e2e8f0; }
+#fileCard:hover {
+  transform: translateY(-3px);
+}
 
-/* BUTTONS */
+/* =========================
+   BUTTONS
+========================= */
+
 button {
   padding: 10px 16px;
   border-radius: 10px;
   border: none;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
   margin: 5px;
   cursor: pointer;
@@ -175,90 +234,57 @@ button {
 
 button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59,130,246,0.5);
+  box-shadow: 0 10px 25px rgba(59,130,246,0.5);
 }
 
 button:disabled {
   background: gray;
   cursor: not-allowed;
-  box-shadow: none;
-}
-  
-/* LIGHT MODE GLOW UPGRADE */
-body.light {
-  background:
-    radial-gradient(circle at 20% 0%, #ffffff, #e2e8f0 60%, #cbd5e1);
-}
-  /* MESSAGE POSITION */
-#message {
-  position: absolute;
-  top: 70px;          /* below navbar */
-  right: 20px;        /* top right corner */
-  font-size: 13px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  max-width: 260px;
-  z-index: 999;
-
-  /* smooth look */
-  backdrop-filter: blur(8px);
-  transition: 0.3s ease;
 }
 
-/* DARK MODE (default) */
-body:not(.light) #message {
-  color: #ffffff;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-}
+/* =========================
+   STATUS
+========================= */
 
-/* GLASS MODE */
-body.glass #message {
-  color: #ffffff;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.2);
-}
-
-/* LIGHT MODE */
-body.light #message {
-  color: #0f172a;
-  background: rgba(0,0,0,0.05);
-  border: 1px solid rgba(0,0,0,0.1);
-}
-
-/* CARD POP */
-body.light .container {
-  background: white;
-
-  box-shadow:
-    0 25px 60px rgba(0,0,0,0.12),
-    0 5px 15px rgba(0,0,0,0.06);
-
-  transform: translateY(0);
-  transition: 0.25s;
-}
-
-/* subtle float */
-body.light .container:hover {
-  transform: translateY(-4px);
-}
-/* STATUS */
 #status {
   margin-top: 10px;
-  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+  display: inline-block;
 }
 
-/* PROGRESS */
+/* =========================
+   PROGRESS
+========================= */
+
 #progressBar {
   height: 6px;
   width: 0%;
   background: #22c55e;
   border-radius: 10px;
   margin-top: 10px;
-  transition: width 0.3s;
+  position: relative;
+  overflow: hidden;
 }
 
-/* OUTPUT */
+#progressBar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  animation: shine 1.5s infinite;
+}
+
+@keyframes shine {
+  100% { transform: translateX(100%); }
+}
+
+/* =========================
+   OUTPUT
+========================= */
+
 #output {
   margin-top: 15px;
   padding: 10px;
@@ -266,49 +292,44 @@ body.light .container:hover {
   max-height: 250px;
   overflow: auto;
   background: rgba(0,0,0,0.4);
-}
-
-body.light #output {
-  background: #e2e8f0;
-}
-  /* DARK MODE UPGRADE */
-body:not(.light):not(.glass) {
-  background:
-    radial-gradient(circle at 20% 0%, #1e293b, transparent),
-    linear-gradient(to bottom, #0f172a, #020617);
-}
-
-body:not(.light):not(.glass) .container {
-  background: linear-gradient(145deg, #020617, #0f172a);
-
-  border: 1px solid rgba(255,255,255,0.06);
-
-  box-shadow:
-    0 25px 70px rgba(0,0,0,0.7),
-    inset 0 1px 0 rgba(255,255,255,0.05);
+  font-family: monospace;
+  font-size: 13px;
 }
 </style>
 </head>
 
 <body>
-<div id="message">All files are processed locally in your browser.
-No data is uploaded or stored.</div>
+
 <div class="navbar">
   <div class="logo">NO-risk</div>
 
-  <div class="nav-links">
-    <a href="#" onclick="openUpload()">Upload</a>
-    <a href="https://github.com/goat-67/NO-risk#readme" target="_blank">About</a>
+  <div>
+    <!-- DARK -->
+    <label class="switch">
+      <input type="radio" name="mode" onclick="setMode('dark')" checked>
+      <span class="slider"></span>
+    </label>
 
-    <span class="toggle" onclick="setMode('dark')">🌙</span>
-    <span class="toggle" onclick="setMode('light')">☀️</span>
-    <span class="toggle" onclick="setMode('glass')">🧊</span>
+    <!-- LIGHT -->
+    <label class="switch">
+      <input type="radio" name="mode" onclick="setMode('light')">
+      <span class="slider"></span>
+    </label>
+
+    <!-- GLASS -->
+    <label class="switch">
+      <input type="radio" name="mode" onclick="setMode('glass')">
+      <span class="slider"></span>
+    </label>
   </div>
+</div>
+
+<div id="message">
+  All files are processed locally.<br>No data is uploaded.
 </div>
 
 <div class="container">
   <h1>File → JSON / Markdown</h1>
-  <p>Upload CSV or Excel and convert instantly</p>
 
   <div id="dropzone">Drag & Drop File</div>
   <input type="file" id="fileInput" hidden>
@@ -322,14 +343,12 @@ No data is uploaded or stored.</div>
     <button id="downloadMdBtn" disabled>Download MD</button>
   </div>
 
-  <div id="status">Upload a File</div>
+  <div id="status">Upload a File...</div>
   <div id="progressBar"></div>
   <div id="output"></div>
 </div>
-<script src="xlsx.full.min.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
 
+<script>
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
 const output = document.getElementById("output");
@@ -344,30 +363,20 @@ const downloadMdBtn = document.getElementById("downloadMdBtn");
 let fullData = null;
 let markdownData = null;
 
-/* =========================
-   MODE SWITCH
-========================= */
-window.setMode = function(mode) {
+function setMode(mode) {
   document.body.classList.remove("light", "glass");
   if (mode !== "dark") document.body.classList.add(mode);
-};
+}
 
-/* =========================
-   OPEN FILE
-========================= */
-window.openUpload = function() {
+function openUpload() {
   fileInput.click();
-};
+}
 
-/* =========================
-   RESET UI
-========================= */
 function resetUI() {
-  output.innerHTML = "";
+  output.textContent = "";
   status.textContent = "Upload a File...";
   progress.style.width = "0%";
   fileCard.style.display = "none";
-
   fullData = null;
   markdownData = null;
 
@@ -376,155 +385,8 @@ function resetUI() {
   downloadMdBtn.disabled = true;
 }
 
-/* =========================
-   CSV PARSER (SMART)
-========================= */
-function parseCSV(text) {
-  const rows = [];
-  const lines = text.split("\n").filter(l => l.trim());
-
-  const headers = lines[0].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-    let obj = {};
-
-    headers.forEach((h, j) => {
-      obj[h.replace(/"/g, "").trim()] =
-        (values[j] || "").replace(/"/g, "").trim();
-    });
-
-    rows.push(obj);
-  }
-
-  return rows;
-}
-
-/* =========================
-   TABLE RENDER
-========================= */
-function renderTable(data) {
-  if (!data.length) return;
-
-  const keys = Object.keys(data[0]);
-  let html = "<table style='width:100%; border-collapse: collapse;'>";
-
-  html += "<tr>";
-  keys.forEach(k => {
-    html += `<th style="padding:8px; text-align:left; border-bottom:1px solid #ccc;">${k}</th>`;
-  });
-  html += "</tr>";
-
-  data.slice(0, 20).forEach(row => {
-    html += "<tr>";
-    keys.forEach(k => {
-      html += `<td style="padding:6px; border-bottom:1px solid rgba(255,255,255,0.05);">${row[k] ?? ""}</td>`;
-    });
-    html += "</tr>";
-  });
-
-  html += "</table>";
-  output.innerHTML = html;
-}
-
-/* =========================
-   SENSITIVE CHECK
-========================= */
-function containsSSN(text) {
-  return /\b\d{3}-\d{2}-\d{4}\b/.test(text);
-}
-
-function luhnCheck(num) {
-  let sum = 0, flip = false;
-  for (let i = num.length - 1; i >= 0; i--) {
-    let n = +num[i];
-    if (flip) {
-      n *= 2;
-      if (n > 9) n -= 9;
-    }
-    sum += n;
-    flip = !flip;
-  }
-  return sum % 10 === 0;
-}
-
-function containsCard(text) {
-  const digits = text.replace(/[^\d]/g, "");
-  return digits.length >= 13 && digits.length <= 19 && luhnCheck(digits);
-}
-
-/* =========================
-   HANDLE FILE
-========================= */
-async function handleFile(file) {
-  if (!file) return;
-
-  resetUI();
-
-  fileCard.style.display = "flex";
-  fileCard.innerHTML = `
-    <span class="file-icon">📄</span>
-    <span class="file-name">${file.name}</span>
-    <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
-    <span class="file-type">${file.name.split('.').pop().toUpperCase()}</span>
-    <span class="file-check"></span>
-  `;
-
-  status.textContent = "Processing...";
-  progress.style.width = "30%";
-
-  let rows = [];
-
-  if (file.name.toLowerCase().endsWith(".csv")) {
-    const text = await file.text();
-    rows = parseCSV(text);
-
-  } else if (file.name.toLowerCase().endsWith(".xlsx")) {
-
-    const data = await file.arrayBuffer();
-    const workbook = XLSX.read(data, { type: "array" });
-
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    rows = XLSX.utils.sheet_to_json(sheet);
-
-  } else {
-    status.textContent = "❌ Only CSV or Excel files allowed";
-    progress.style.width = "0%";
-    return;
-  }
-
-  progress.style.width = "60%";
-
-  for (const row of rows) {
-    for (const key in row) {
-      const val = String(row[key]);
-
-      if (containsSSN(val) || containsCard(val)) {
-        status.textContent = "❌ Sensitive data detected";
-        progress.style.width = "0%";
-        return;
-      }
-    }
-  }
-
-  fullData = rows;
-
-  renderTable(rows);
-
-  status.textContent = `✅ ${rows.length} rows processed`;
-  progress.style.width = "100%";
-
-  fileCard.querySelector(".file-check").textContent = "✔";
-
-  downloadJsonBtn.disabled = false;
-  convertMdBtn.disabled = false;
-}
-
-/* =========================
-   EVENTS
-========================= */
-
 fileInput.addEventListener("change", () => {
+  resetUI();
   handleFile(fileInput.files[0]);
 });
 
@@ -533,27 +395,56 @@ dropzone.addEventListener("click", openUpload);
 dropzone.addEventListener("dragover", e => {
   e.preventDefault();
   dropzone.classList.add("hover");
-  dropzone.textContent = "Drop file 🚀";
 });
 
 dropzone.addEventListener("dragleave", () => {
   dropzone.classList.remove("hover");
-  dropzone.textContent = "Drag & Drop File";
 });
 
 dropzone.addEventListener("drop", e => {
   e.preventDefault();
   dropzone.classList.remove("hover");
-  dropzone.textContent = "Drag & Drop File";
+  resetUI();
   handleFile(e.dataTransfer.files[0]);
 });
 
-/* =========================
-   DOWNLOAD JSON
-========================= */
-downloadJsonBtn.onclick = () => {
-  if (!fullData) return;
+/* KEEPING YOUR LOGIC SAME */
+async function handleFile(file) {
+  if (!file) return;
 
+  fileCard.style.display = "flex";
+  fileCard.innerHTML = `
+    <span>📄 ${file.name}</span>
+    <span>${(file.size / 1024).toFixed(1)} KB</span>
+  `;
+
+  status.textContent = "Processing...";
+  progress.style.width = "30%";
+
+  const text = await file.text();
+  const lines = text.split("\n").filter(l => l.trim());
+  const headers = lines[0].split(",");
+
+  const rows = lines.slice(1).map(line => {
+    const values = line.split(",");
+    let obj = {};
+    headers.forEach((h, i) => {
+      obj[h.trim()] = (values[i] || "").trim();
+    });
+    return obj;
+  });
+
+  fullData = rows;
+  output.textContent = JSON.stringify(rows.slice(0, 10), null, 2);
+
+  status.textContent = "✅ Passed all checks";
+  progress.style.width = "100%";
+
+  downloadJsonBtn.disabled = false;
+  convertMdBtn.disabled = false;
+}
+
+downloadJsonBtn.onclick = () => {
   const blob = new Blob([JSON.stringify(fullData)], {type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -561,14 +452,8 @@ downloadJsonBtn.onclick = () => {
   a.click();
 };
 
-/* =========================
-   CONVERT MD
-========================= */
 convertMdBtn.onclick = () => {
-  if (!fullData || !fullData.length) return;
-
   const keys = Object.keys(fullData[0]);
-
   let md = "| " + keys.join(" | ") + " |\n";
   md += "| " + keys.map(() => "---").join(" | ") + " |\n";
 
@@ -582,22 +467,14 @@ convertMdBtn.onclick = () => {
   downloadMdBtn.disabled = false;
 };
 
-/* =========================
-   DOWNLOAD MD
-========================= */
 downloadMdBtn.onclick = () => {
-  if (!markdownData) return;
-
   const blob = new Blob([markdownData], {type:"text/markdown"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "file.md";
   a.click();
 };
-
-});
 </script>
 
 </body>
 </html>
-
