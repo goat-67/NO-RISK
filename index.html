@@ -373,9 +373,13 @@ async function handleFile(file) {
 
   try {
     const res = await fetch("https://no-risk-gkhr.onrender.com/upload", {
-      method: "POST",
-      body: formData
-    });
+  method: "POST",
+  headers: {
+    "x-api-key": "YOUR_API_KEY",
+    "x-internal-secret": "YOUR_SECRET"
+  },
+  body: formData
+});
 
     const data = await res.json();
     progress.style.width = "80%";
@@ -396,7 +400,7 @@ async function handleFile(file) {
     convertMdBtn.disabled = false;
 
   } catch {
-    status.textContent = "❌ Sensitive Data entered";
+    status.textContent = "❌ Sensitive Data Entered";
     progress.style.width = "0%";
   }
 }
