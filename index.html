@@ -1,299 +1,169 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NO-risk</title>
+<title>NO-risk</title>
+
+<!-- LOCAL XLSX (from your repo) -->
+<script src="xlsx.full.min.js"></script>
 
 <style>
 * { box-sizing: border-box; }
-
 body {
-  margin: 0;
-  font-family: "Inter", "Segoe UI", Arial;
-  color: #e2e8f0;
+  margin:0;
+  font-family: "Inter", Arial;
   transition: 0.3s;
 }
 
-/* =========================
-   MODES
-========================= */
+/* ================= MODES ================= */
 
 /* DARK */
 body {
-  background:
-    radial-gradient(circle at 20% 0%, #1e293b, transparent),
-    linear-gradient(to bottom, #0f172a, #020617);
+  background: linear-gradient(-45deg,#0f172a,#020617,#1e293b,#020617);
+  background-size: 400% 400%;
+  animation: darkMove 12s ease infinite;
+  color:#e2e8f0;
+}
+
+@keyframes darkMove {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
 }
 
 /* LIGHT */
 body.light {
-  background:
-    radial-gradient(circle at 20% 0%, #ffffff, #e2e8f0 60%, #cbd5e1);
-  color: #0f172a;
+  background: linear-gradient(-45deg,#ffffff,#e2e8f0,#cbd5e1,#f1f5f9);
+  background-size: 400% 400%;
+  animation: lightMove 12s ease infinite;
+  color:#0f172a;
+}
+
+@keyframes lightMove {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
 }
 
 /* GLASS */
 body.glass {
-  background: linear-gradient(120deg, #1e3a8a, #0f172a, #1e293b);
-  background-size: 200% 200%;
-  animation: bgMove 12s ease infinite;
+  background: linear-gradient(120deg,#1e3a8a,#0f172a,#1e293b);
 }
 
-@keyframes bgMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* =========================
-   NAVBAR
-========================= */
+/* ================= NAV ================= */
 
 .navbar {
-  padding: 16px 28px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(2,6,23,0.7);
-  backdrop-filter: blur(10px);
-  position: relative;
+  padding:16px 28px;
+  display:flex;
+  justify-content:space-between;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(10px);
 }
 
-body.light .navbar { background: white; }
+.logo { color:#60a5fa; }
 
-body.glass .navbar {
-  background: rgba(255,255,255,0.05);
+/* toggle */
+.toggle {
+  cursor:pointer;
+  margin-left:10px;
 }
 
-.logo {
-  color: #60a5fa;
-  font-weight: 600;
-}
-
-/* =========================
-   TOGGLE SWITCHES
-========================= */
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 46px;
-  height: 24px;
-  margin-left: 10px;
-}
-
-.switch input { display: none; }
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  inset: 0;
-  background: #64748b;
-  border-radius: 999px;
-  transition: 0.3s;
-}
-
-.slider:before {
-  content: "";
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  top: 3px;
-  background: white;
-  border-radius: 50%;
-  transition: 0.3s;
-}
-
-input:checked + .slider {
-  background: #22c55e;
-}
-
-input:checked + .slider:before {
-  transform: translateX(22px);
-}
-
-/* =========================
-   MESSAGE
-========================= */
-
-#message {
-  position: fixed;
-  top: 70px;
-  right: 20px;
-  font-size: 13px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  max-width: 260px;
-  backdrop-filter: blur(8px);
-  z-index: 999;
-}
-
-body:not(.light) #message {
-  color: white;
-  background: rgba(255,255,255,0.05);
-}
-
-body.light #message {
-  color: black;
-  background: rgba(0,0,0,0.05);
-}
-
-/* =========================
-   MAIN CARD
-========================= */
+/* ================= CARD ================= */
 
 .container {
-  max-width: 720px;
-  margin: 80px auto;
-  padding: 30px;
-  text-align: center;
-  border-radius: 20px;
-  background: rgba(2,6,23,0.7);
-  box-shadow: 0 25px 70px rgba(0,0,0,0.7);
-  position: relative;
+  max-width:720px;
+  margin:80px auto;
+  padding:30px;
+  border-radius:20px;
+  background:rgba(0,0,0,0.6);
 }
 
-/* glow border */
-.container::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: 20px;
-  background: linear-gradient(120deg, #3b82f6, #22c55e);
-  opacity: 0.3;
-  z-index: -1;
-}
-
-body.light .container {
-  background: white;
-}
-
-body.glass .container {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(25px) saturate(140%);
-}
-
-/* =========================
-   DROPZONE
-========================= */
+/* ================= DROPZONE ================= */
 
 #dropzone {
-  height: 180px;
-  border: 2px dashed #64748b;
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 15px;
-  transition: 0.2s;
-  animation: pulse 2.5s infinite;
+  height:180px;
+  border:2px dashed #64748b;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:15px;
+  border-radius:15px;
+  transition:0.2s;
 }
 
 #dropzone.hover {
-  border-color: #22c55e;
-  box-shadow: 0 0 25px rgba(34,197,94,0.4);
-  transform: scale(1.02);
+  border-color:#22c55e;
+  box-shadow:0 0 25px rgba(34,197,94,0.4);
 }
 
-@keyframes pulse {
-  50% { box-shadow: 0 0 20px rgba(34,197,94,0.3); }
-}
-
-/* =========================
-   FILE CARD
-========================= */
+/* ================= FILE CARD ================= */
 
 #fileCard {
-  display: none;
-  padding: 12px;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  background: rgba(255,255,255,0.05);
-  display: flex;
-  justify-content: space-between;
+  display:none;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.05);
+  margin-bottom:10px;
 }
 
-#fileCard:hover {
-  transform: translateY(-3px);
-}
-
-/* =========================
-   BUTTONS
-========================= */
+/* ================= BUTTONS ================= */
 
 button {
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: white;
-  margin: 5px;
-  cursor: pointer;
-  transition: 0.2s;
+  padding:10px 14px;
+  border:none;
+  border-radius:8px;
+  background:#3b82f6;
+  color:white;
+  margin:5px;
+  cursor:pointer;
 }
 
 button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(59,130,246,0.5);
+  transform:translateY(-2px);
 }
 
-button:disabled {
-  background: gray;
-  cursor: not-allowed;
-}
+/* ================= STATUS ================= */
 
-/* =========================
-   STATUS
-========================= */
+#status { margin-top:10px; }
 
-#status {
-  margin-top: 10px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(34,197,94,0.15);
-  color: #22c55e;
-  display: inline-block;
-}
-
-/* =========================
-   PROGRESS
-========================= */
+/* ================= PROGRESS ================= */
 
 #progressBar {
-  height: 6px;
-  width: 0%;
-  background: #22c55e;
-  border-radius: 10px;
-  margin-top: 10px;
-  position: relative;
-  overflow: hidden;
+  height:6px;
+  background:#22c55e;
+  width:0%;
+  border-radius:10px;
+  margin-top:10px;
 }
 
-#progressBar::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-  animation: shine 1.5s infinite;
-}
-
-@keyframes shine {
-  100% { transform: translateX(100%); }
-}
-
-/* =========================
-   OUTPUT
-========================= */
+/* ================= OUTPUT ================= */
 
 #output {
-  margin-top: 15px;
-  padding: 10px;
-  border-radius: 10px;
-  max-height: 250px;
-  overflow: auto;
-  background: rgba(0,0,0,0.4);
-  font-family: monospace;
-  font-size: 13px;
+  margin-top:15px;
+  padding:10px;
+  border-radius:10px;
+  max-height:250px;
+  overflow:auto;
+  background:rgba(0,0,0,0.4);
+  font-family:monospace;
+}
+
+/* ================= TABLE ================= */
+
+table {
+  width:100%;
+  border-collapse:collapse;
+}
+
+td, th {
+  border:1px solid rgba(255,255,255,0.2);
+  padding:6px;
+  font-size:12px;
+}
+
+/* highlight bad */
+.bad {
+  background:#dc2626 !important;
+  color:white;
 }
 </style>
 </head>
@@ -302,50 +172,33 @@ button:disabled {
 
 <div class="navbar">
   <div class="logo">NO-risk</div>
-
   <div>
-    <!-- DARK -->
-    <label class="switch">
-      <input type="radio" name="mode" onclick="setMode('dark')" checked>
-      <span class="slider"></span>
-    </label>
-
-    <!-- LIGHT -->
-    <label class="switch">
-      <input type="radio" name="mode" onclick="setMode('light')">
-      <span class="slider"></span>
-    </label>
-
-    <!-- GLASS -->
-    <label class="switch">
-      <input type="radio" name="mode" onclick="setMode('glass')">
-      <span class="slider"></span>
-    </label>
+    <span class="toggle" onclick="setMode('dark')">🌙</span>
+    <span class="toggle" onclick="setMode('light')">☀️</span>
+    <span class="toggle" onclick="setMode('glass')">🧊</span>
   </div>
-</div>
-
-<div id="message">
-  All files are processed locally.<br>No data is uploaded.
 </div>
 
 <div class="container">
-  <h1>File → JSON / Markdown</h1>
+<h1>File → JSON / Markdown</h1>
 
-  <div id="dropzone">Drag & Drop File</div>
-  <input type="file" id="fileInput" hidden>
+<div id="dropzone">Drag & Drop File</div>
+<input type="file" id="fileInput" hidden>
 
-  <div id="fileCard"></div>
+<div id="fileCard"></div>
 
-  <div>
-    <button onclick="openUpload()">Upload File</button>
-    <button id="downloadJsonBtn" disabled>Download JSON</button>
-    <button id="convertMdBtn" disabled>Convert to MD</button>
-    <button id="downloadMdBtn" disabled>Download MD</button>
-  </div>
+<div>
+  <button onclick="openUpload()">Upload File</button>
+  <button id="toggleViewBtn" disabled>Toggle Table</button>
+  <button id="downloadJsonBtn" disabled>Download JSON</button>
+  <button id="convertMdBtn" disabled>Convert to MD</button>
+  <button id="downloadMdBtn" disabled>Download MD</button>
+</div>
 
-  <div id="status">Upload a File...</div>
-  <div id="progressBar"></div>
-  <div id="output"></div>
+<div id="status">Upload a File...</div>
+<div id="progressBar"></div>
+<div id="output"></div>
+
 </div>
 
 <script>
@@ -359,119 +212,172 @@ const fileCard = document.getElementById("fileCard");
 const downloadJsonBtn = document.getElementById("downloadJsonBtn");
 const convertMdBtn = document.getElementById("convertMdBtn");
 const downloadMdBtn = document.getElementById("downloadMdBtn");
+const toggleViewBtn = document.getElementById("toggleViewBtn");
 
 let fullData = null;
 let markdownData = null;
+let tableMode = false;
 
-function setMode(mode) {
-  document.body.classList.remove("light", "glass");
-  if (mode !== "dark") document.body.classList.add(mode);
+/* MODE */
+function setMode(mode){
+  document.body.classList.remove("light","glass");
+  if(mode !== "dark") document.body.classList.add(mode);
 }
 
-function openUpload() {
+/* UPLOAD */
+function openUpload(){
   fileInput.click();
 }
 
-function resetUI() {
-  output.textContent = "";
-  status.textContent = "Upload a File...";
-  progress.style.width = "0%";
-  fileCard.style.display = "none";
-  fullData = null;
-  markdownData = null;
-
-  downloadJsonBtn.disabled = true;
-  convertMdBtn.disabled = true;
-  downloadMdBtn.disabled = true;
-}
-
-fileInput.addEventListener("change", () => {
-  resetUI();
+fileInput.addEventListener("change",()=>{
   handleFile(fileInput.files[0]);
 });
 
-dropzone.addEventListener("click", openUpload);
+dropzone.onclick = openUpload;
 
-dropzone.addEventListener("dragover", e => {
+dropzone.addEventListener("dragover",e=>{
   e.preventDefault();
   dropzone.classList.add("hover");
 });
 
-dropzone.addEventListener("dragleave", () => {
+dropzone.addEventListener("dragleave",()=>{
   dropzone.classList.remove("hover");
 });
 
-dropzone.addEventListener("drop", e => {
+dropzone.addEventListener("drop",e=>{
   e.preventDefault();
   dropzone.classList.remove("hover");
-  resetUI();
   handleFile(e.dataTransfer.files[0]);
 });
 
-/* KEEPING YOUR LOGIC SAME */
-async function handleFile(file) {
-  if (!file) return;
-
-  fileCard.style.display = "flex";
-  fileCard.innerHTML = `
-    <span>📄 ${file.name}</span>
-    <span>${(file.size / 1024).toFixed(1)} KB</span>
-  `;
-
-  status.textContent = "Processing...";
-  progress.style.width = "30%";
-
-  const text = await file.text();
-  const lines = text.split("\n").filter(l => l.trim());
-  const headers = lines[0].split(",");
-
-  const rows = lines.slice(1).map(line => {
-    const values = line.split(",");
-    let obj = {};
-    headers.forEach((h, i) => {
-      obj[h.trim()] = (values[i] || "").trim();
-    });
-    return obj;
-  });
-
-  fullData = rows;
-  output.textContent = JSON.stringify(rows.slice(0, 10), null, 2);
-
-  status.textContent = "✅ Passed all checks";
-  progress.style.width = "100%";
-
-  downloadJsonBtn.disabled = false;
-  convertMdBtn.disabled = false;
+/* SENSITIVE CHECK */
+function containsSSN(text){
+  return /\b\d{3}-\d{2}-\d{4}\b/.test(text);
 }
 
-downloadJsonBtn.onclick = () => {
-  const blob = new Blob([JSON.stringify(fullData)], {type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "file.json";
+function luhnCheck(num){
+  let sum=0,flip=false;
+  for(let i=num.length-1;i>=0;i--){
+    let n=+num[i];
+    if(flip){ n*=2; if(n>9)n-=9; }
+    sum+=n; flip=!flip;
+  }
+  return sum%10===0;
+}
+
+function containsCard(text){
+  const digits=text.replace(/[^\d]/g,"");
+  return digits.length>=13 && digits.length<=19 && luhnCheck(digits);
+}
+
+/* HANDLE FILE */
+async function handleFile(file){
+  if(!file) return;
+
+  fileCard.style.display="block";
+  fileCard.textContent=file.name;
+
+  progress.style.width="30%";
+
+  let rows=[];
+
+  if(file.name.endsWith(".csv")){
+    const text=await file.text();
+    const lines=text.split("\n").filter(l=>l.trim());
+    const headers=lines[0].split(",");
+
+    rows=lines.slice(1).map(l=>{
+      const vals=l.split(",");
+      let obj={};
+      headers.forEach((h,i)=>obj[h.trim()]=(vals[i]||"").trim());
+      return obj;
+    });
+
+  } else if(file.name.endsWith(".xlsx")){
+    const data=await file.arrayBuffer();
+    const wb=XLSX.read(data,{type:"array"});
+    const sheet=wb.Sheets[wb.SheetNames[0]];
+    rows=XLSX.utils.sheet_to_json(sheet);
+
+  } else {
+    status.textContent="❌ Only CSV/XLSX";
+    return;
+  }
+
+  fullData = rows;
+
+  renderOutput();
+
+  status.textContent="✅ Processed";
+  progress.style.width="100%";
+
+  downloadJsonBtn.disabled=false;
+  convertMdBtn.disabled=false;
+  toggleViewBtn.disabled=false;
+}
+
+/* RENDER */
+function renderOutput(){
+  if(!tableMode){
+    output.textContent = JSON.stringify(fullData.slice(0,10),null,2);
+  } else {
+    let html="<table><tr>";
+    const keys=Object.keys(fullData[0]);
+
+    keys.forEach(k=>html+=`<th>${k}</th>`);
+    html+="</tr>";
+
+    fullData.slice(0,50).forEach(row=>{
+      html+="<tr>";
+      keys.forEach(k=>{
+        let val=String(row[k]);
+        let bad = containsSSN(val)||containsCard(val);
+        html+=`<td class="${bad?'bad':''}">${val}</td>`;
+      });
+      html+="</tr>";
+    });
+
+    html+="</table>";
+    output.innerHTML=html;
+  }
+}
+
+/* TOGGLE VIEW */
+toggleViewBtn.onclick=()=>{
+  tableMode=!tableMode;
+  renderOutput();
+};
+
+/* DOWNLOAD JSON */
+downloadJsonBtn.onclick=()=>{
+  const blob=new Blob([JSON.stringify(fullData)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="file.json";
   a.click();
 };
 
-convertMdBtn.onclick = () => {
-  const keys = Object.keys(fullData[0]);
-  let md = "| " + keys.join(" | ") + " |\n";
-  md += "| " + keys.map(() => "---").join(" | ") + " |\n";
+/* CONVERT MD */
+convertMdBtn.onclick=()=>{
+  const keys=Object.keys(fullData[0]);
+  let md="| "+keys.join(" | ")+" |\n";
+  md+="| "+keys.map(()=> "---").join(" | ")+" |\n";
 
-  fullData.forEach(r => {
-    md += "| " + keys.map(k => r[k]).join(" | ") + " |\n";
+  fullData.forEach(r=>{
+    md+="| "+keys.map(k=>r[k]).join(" | ")+" |\n";
   });
 
-  markdownData = md;
-  output.textContent = md;
-
-  downloadMdBtn.disabled = false;
+  markdownData=md;
+  output.textContent=md;
+  downloadMdBtn.disabled=false;
 };
 
-downloadMdBtn.onclick = () => {
-  const blob = new Blob([markdownData], {type:"text/markdown"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "file.md";
+/* DOWNLOAD MD */
+downloadMdBtn.onclick=()=>{
+  const blob=new Blob([markdownData],{type:"text/markdown"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="file.md";
   a.click();
 };
 </script>
