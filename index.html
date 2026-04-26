@@ -189,6 +189,42 @@ body.light {
   background:
     radial-gradient(circle at 20% 0%, #ffffff, #e2e8f0 60%, #cbd5e1);
 }
+  /* MESSAGE POSITION */
+#message {
+  position: absolute;
+  top: 70px;          /* below navbar */
+  right: 20px;        /* top right corner */
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  max-width: 260px;
+  z-index: 999;
+
+  /* smooth look */
+  backdrop-filter: blur(8px);
+  transition: 0.3s ease;
+}
+
+/* DARK MODE (default) */
+body:not(.light) #message {
+  color: #ffffff;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* GLASS MODE */
+body.glass #message {
+  color: #ffffff;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* LIGHT MODE */
+body.light #message {
+  color: #0f172a;
+  background: rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.1);
+}
 
 /* CARD POP */
 body.light .container {
@@ -255,7 +291,8 @@ body:not(.light):not(.glass) .container {
 </head>
 
 <body>
-
+<div class="message">All files are processed locally in your browser.
+No data is uploaded or stored.</div>
 <div class="navbar">
   <div class="logo">NO-risk</div>
 
