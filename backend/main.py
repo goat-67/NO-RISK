@@ -10,6 +10,41 @@ import hmac
 import logging
 import re
 
+def contains_ssn(text: str) -> bool:
+    # Matches XXX-XX-XXXX
+    return bool(re.search(r"\b\d{3}-\d{2}-\d{4}\b", text))
+
+def luhn_check(number: str) -> bool:
+    total = 0
+    reverse_digits = number[::-1]
+    for i, digit in enumerate(reverse_digits):
+        try:
+            n = int(digit)
+            if i % 2 == 1:
+                n *= 2
+                if n > 9:
+                    n -= 9
+            total += n
+        except ValueError:
+            return False
+    return total % 10 == 0
+
+def contains_credit_card(text: str) -> bool:
+    # Remove spaces and dashes
+    cleaned = re.sub(r"[ -]", "", text)
+    # Must be all digits and between 13-19 chars
+    if not cleaned.isdigit() or not (13 <= len(cleaned) <= 19):
+        return False
+    return luhn_check(cleaned)
+
+def has_sensitive_data(df):
+    for col in df.columns:
+        # Check every value in the column
+        for val in df[col]:
+            val_str = str(val)
+            if contains_ssn(val_str) or contains_credit_card(val_str):
+                return True
+    return False
 # =========================
 # APP INIT
 # =========================
@@ -101,51 +136,18 @@ async def upload_file(
     x_api_key: str = Header(None),
     x_internal_secret: str = Header(None)
 ):
+      try:
+        contents = await file.read()
   # ========================= # 🚨 SENSITIVE DATA DETECTION # ========================= 
      # 🔐 DOUBLE AUTH CHECK
     if not verify(x_api_key, API_KEY) or not verify(x_internal_secret, SECRET_HEADER):
         raise HTTPException(status_code=403, detail="Unauthorized")
-def contains_ssn(text: str) -> bool:
-    # Matches XXX-XX-XXXX
-    return bool(re.search(r"\b\d{3}-\d{2}-\d{4}\b", text))
 
-def luhn_check(number: str) -> bool:
-    total = 0
-    reverse_digits = number[::-1]
-    for i, digit in enumerate(reverse_digits):
-        try:
-            n = int(digit)
-            if i % 2 == 1:
-                n *= 2
-                if n > 9:
-                    n -= 9
-            total += n
-        except ValueError:
-            return False
-    return total % 10 == 0
-
-def contains_credit_card(text: str) -> bool:
-    # Remove spaces and dashes
-    cleaned = re.sub(r"[ -]", "", text)
-    # Must be all digits and between 13-19 chars
-    if not cleaned.isdigit() or not (13 <= len(cleaned) <= 19):
-        return False
-    return luhn_check(cleaned)
-
-def has_sensitive_data(df):
-    for col in df.columns:
-        # Check every value in the column
-        for val in df[col]:
-            val_str = str(val)
-            if contains_ssn(val_str) or contains_credit_card(val_str):
-                return True
-    return False
 
 # ========================= # ROUTES # =========================
 
 
-    try:
-        contents = await file.read()
+  
 
         # 🔒 FILE SIZE CHECK
         if len(contents) > MAX_FILE_SIZE:
