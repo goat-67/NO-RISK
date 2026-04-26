@@ -42,6 +42,7 @@ body.glass::before {
   justify-content: space-between;
   align-items: center;
   background: rgba(2,6,23,0.7);
+   backdrop-filter: blur(10px);
 }
 
 body.light .navbar { background: white; }
@@ -181,7 +182,22 @@ button:disabled {
   cursor: not-allowed;
   box-shadow: none;
 }
+  
+/* LIGHT MODE UPGRADE */
+body.light {
+  background:
+    radial-gradient(circle at top, #ffffff, #e2e8f0);
+}
 
+body.light .container {
+  background: white;
+
+  border: 1px solid #e2e8f0;
+
+  box-shadow:
+    0 15px 40px rgba(0,0,0,0.08),
+    0 2px 6px rgba(0,0,0,0.04);
+}
 /* STATUS */
 #status {
   margin-top: 10px;
@@ -210,6 +226,22 @@ button:disabled {
 
 body.light #output {
   background: #e2e8f0;
+}
+  /* DARK MODE UPGRADE */
+body:not(.light):not(.glass) {
+  background:
+    radial-gradient(circle at 20% 0%, #1e293b, transparent),
+    linear-gradient(to bottom, #0f172a, #020617);
+}
+
+body:not(.light):not(.glass) .container {
+  background: linear-gradient(145deg, #020617, #0f172a);
+
+  border: 1px solid rgba(255,255,255,0.06);
+
+  box-shadow:
+    0 25px 70px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.05);
 }
 </style>
 </head>
@@ -322,7 +354,7 @@ async function handleFile(file) {
   <span class="file-icon">📄</span>
   <span class="file-name">${file.name}</span>
   <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
-  <span class="file-check">✔</span>
+  <span class="file-check"></span>
 `;
 
   status.textContent = "Uploading...";
