@@ -289,8 +289,10 @@ body:not(.light):not(.glass) .container {
   <div id="progressBar"></div>
   <div id="output"></div>
 </div>
-
+<script src="xlsx.full.min.js"></script>
 <script>
+document.addEventListener("DOMContentLoaded", () => {
+
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
 const output = document.getElementById("output");
@@ -305,23 +307,30 @@ const downloadMdBtn = document.getElementById("downloadMdBtn");
 let fullData = null;
 let markdownData = null;
 
-/* MODE SWITCH */
-function setMode(mode) {
+/* =========================
+   MODE SWITCH
+========================= */
+window.setMode = function(mode) {
   document.body.classList.remove("light", "glass");
   if (mode !== "dark") document.body.classList.add(mode);
-}
+};
 
-/* OPEN FILE */
-function openUpload() {
+/* =========================
+   OPEN FILE
+========================= */
+window.openUpload = function() {
   fileInput.click();
-}
+};
 
-/* RESET UI */
+/* =========================
+   RESET UI
+========================= */
 function resetUI() {
-  output.textContent = "";
+  output.innerHTML = "";
   status.textContent = "Upload a File...";
   progress.style.width = "0%";
   fileCard.style.display = "none";
+
   fullData = null;
   markdownData = null;
 
@@ -330,36 +339,97 @@ function resetUI() {
   downloadMdBtn.disabled = true;
 }
 
-/* FILE SELECT */
-fileInput.addEventListener("change", () => {
-  resetUI();
-  handleFile(fileInput.files[0]);
-});
+/* =========================
+   CSV PARSER (SMART)
+========================= */
+function parseCSV(text) {
+  const rows = [];
+  const lines = text.split("\n").filter(l => l.trim());
 
-/* DRAG */
-dropzone.addEventListener("dragover", e => {
-  e.preventDefault();
-  dropzone.classList.add("hover");
-});
+  const headers = lines[0].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
 
-dropzone.addEventListener("dragleave", () => {
-  dropzone.classList.remove("hover");
-});
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+    let obj = {};
 
-dropzone.addEventListener("drop", e => {
-  e.preventDefault();
-  dropzone.classList.remove("hover");
-  resetUI();
-  handleFile(e.dataTransfer.files[0]);
-});
+    headers.forEach((h, j) => {
+      obj[h.replace(/"/g, "").trim()] =
+        (values[j] || "").replace(/"/g, "").trim();
+    });
+
+    rows.push(obj);
+  }
+
+  return rows;
+}
+
+/* =========================
+   TABLE RENDER
+========================= */
+function renderTable(data) {
+  if (!data.length) return;
+
+  const keys = Object.keys(data[0]);
+  let html = "<table style='width:100%; border-collapse: collapse;'>";
+
+  html += "<tr>";
+  keys.forEach(k => {
+    html += `<th style="padding:8px; text-align:left; border-bottom:1px solid #ccc;">${k}</th>`;
+  });
+  html += "</tr>";
+
+  data.slice(0, 20).forEach(row => {
+    html += "<tr>";
+    keys.forEach(k => {
+      html += `<td style="padding:6px; border-bottom:1px solid rgba(255,255,255,0.05);">${row[k] ?? ""}</td>`;
+    });
+    html += "</tr>";
+  });
+
+  html += "</table>";
+  output.innerHTML = html;
+}
+
+/* =========================
+   SENSITIVE CHECK
+========================= */
+function containsSSN(text) {
+  return /\b\d{3}-\d{2}-\d{4}\b/.test(text);
+}
+
+function luhnCheck(num) {
+  let sum = 0, flip = false;
+  for (let i = num.length - 1; i >= 0; i--) {
+    let n = +num[i];
+    if (flip) {
+      n *= 2;
+      if (n > 9) n -= 9;
+    }
+    sum += n;
+    flip = !flip;
+  }
+  return sum % 10 === 0;
+}
+
+function containsCard(text) {
+  const digits = text.replace(/[^\d]/g, "");
+  return digits.length >= 13 && digits.length <= 19 && luhnCheck(digits);
+}
+
+/* =========================
+   HANDLE FILE
+========================= */
 async function handleFile(file) {
   if (!file) return;
 
-  fileCard.style.display = "block";
+  resetUI();
+
+  fileCard.style.display = "flex";
   fileCard.innerHTML = `
     <span class="file-icon">📄</span>
     <span class="file-name">${file.name}</span>
     <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
+    <span class="file-type">${file.name.split('.').pop().toUpperCase()}</span>
     <span class="file-check"></span>
   `;
 
@@ -368,24 +438,9 @@ async function handleFile(file) {
 
   let rows = [];
 
-  /* =========================
-     FILE TYPE HANDLING
-  ========================= */
-
   if (file.name.toLowerCase().endsWith(".csv")) {
     const text = await file.text();
-
-    const lines = text.split("\n").filter(l => l.trim());
-    const headers = lines[0].split(",");
-
-    rows = lines.slice(1).map(line => {
-      const values = line.split(",");
-      let obj = {};
-      headers.forEach((h, i) => {
-        obj[h.trim()] = (values[i] || "").trim();
-      });
-      return obj;
-    });
+    rows = parseCSV(text);
 
   } else if (file.name.toLowerCase().endsWith(".xlsx")) {
 
@@ -403,33 +458,6 @@ async function handleFile(file) {
 
   progress.style.width = "60%";
 
-  /* =========================
-     SENSITIVE DATA CHECK
-  ========================= */
-
-  function containsSSN(text) {
-    return /\b\d{3}-\d{2}-\d{4}\b/.test(text);
-  }
-
-  function luhnCheck(num) {
-    let sum = 0, flip = false;
-    for (let i = num.length - 1; i >= 0; i--) {
-      let n = +num[i];
-      if (flip) {
-        n *= 2;
-        if (n > 9) n -= 9;
-      }
-      sum += n;
-      flip = !flip;
-    }
-    return sum % 10 === 0;
-  }
-
-  function containsCard(text) {
-    const digits = text.replace(/[^\d]/g, "");
-    return digits.length >= 13 && digits.length <= 19 && luhnCheck(digits);
-  }
-
   for (const row of rows) {
     for (const key in row) {
       const val = String(row[key]);
@@ -442,14 +470,11 @@ async function handleFile(file) {
     }
   }
 
-  /* =========================
-     SUCCESS
-  ========================= */
-
   fullData = rows;
-  output.textContent = JSON.stringify(rows.slice(0, 10), null, 2);
 
-  status.textContent = "✅ Passed all checks";
+  renderTable(rows);
+
+  status.textContent = `✅ ${rows.length} rows processed`;
   progress.style.width = "100%";
 
   fileCard.querySelector(".file-check").textContent = "✔";
@@ -458,31 +483,40 @@ async function handleFile(file) {
   convertMdBtn.disabled = false;
 }
 
-    progress.style.width = "80%";
+/* =========================
+   EVENTS
+========================= */
 
-    if (!res.ok) {
-      status.textContent = "❌ " + (data.detail || "Upload failed");
-      progress.style.width = "0%";
-      return;
-    }
+fileInput.addEventListener("change", () => {
+  handleFile(fileInput.files[0]);
+});
 
-    fullData = data.preview;
-    output.textContent = JSON.stringify(data.preview, null, 2);
+dropzone.addEventListener("click", openUpload);
 
-    status.textContent = "✅ Passed all checks";
-    progress.style.width = "100%";
+dropzone.addEventListener("dragover", e => {
+  e.preventDefault();
+  dropzone.classList.add("hover");
+  dropzone.textContent = "Drop file 🚀";
+});
 
-    downloadJsonBtn.disabled = false;
-    convertMdBtn.disabled = false;
+dropzone.addEventListener("dragleave", () => {
+  dropzone.classList.remove("hover");
+  dropzone.textContent = "Drag & Drop File";
+});
 
-  } catch {
-    status.textContent = "❌ Sensitive Data Entered";
-    progress.style.width = "0%";
-  }
-}
+dropzone.addEventListener("drop", e => {
+  e.preventDefault();
+  dropzone.classList.remove("hover");
+  dropzone.textContent = "Drag & Drop File";
+  handleFile(e.dataTransfer.files[0]);
+});
 
-/* DOWNLOAD JSON */
+/* =========================
+   DOWNLOAD JSON
+========================= */
 downloadJsonBtn.onclick = () => {
+  if (!fullData) return;
+
   const blob = new Blob([JSON.stringify(fullData)], {type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -490,9 +524,14 @@ downloadJsonBtn.onclick = () => {
   a.click();
 };
 
-/* CONVERT MD */
+/* =========================
+   CONVERT MD
+========================= */
 convertMdBtn.onclick = () => {
+  if (!fullData || !fullData.length) return;
+
   const keys = Object.keys(fullData[0]);
+
   let md = "| " + keys.join(" | ") + " |\n";
   md += "| " + keys.map(() => "---").join(" | ") + " |\n";
 
@@ -506,14 +545,20 @@ convertMdBtn.onclick = () => {
   downloadMdBtn.disabled = false;
 };
 
-/* DOWNLOAD MD */
+/* =========================
+   DOWNLOAD MD
+========================= */
 downloadMdBtn.onclick = () => {
+  if (!markdownData) return;
+
   const blob = new Blob([markdownData], {type:"text/markdown"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "file.md";
   a.click();
 };
+
+});
 </script>
 
 </body>
