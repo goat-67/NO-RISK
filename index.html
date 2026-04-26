@@ -291,6 +291,20 @@ body:not(.light):not(.glass) .container {
 </head>
 
 <body>
+  <label style="position:absolute;top:20px;left:20px;z-index:1000;display:flex;align-items:center;gap:6px;font-size:12px;">
+  <span>JSON</span>
+  <input type="checkbox" id="viewToggle" style="display:none;">
+  <span id="switchUI" style="
+    width:38px;height:20px;border-radius:20px;
+    background:#64748b;position:relative;cursor:pointer;display:inline-block;
+  ">
+    <span id="knob" style="
+      position:absolute;width:16px;height:16px;border-radius:50%;
+      background:white;top:2px;left:2px;transition:0.2s;
+    "></span>
+  </span>
+  <span>Table</span>
+</label>
 <div id="message">All files are processed locally in your browser.
 No data is uploaded or stored.</div>
 <div class="navbar">
@@ -340,7 +354,7 @@ const fileCard = document.getElementById("fileCard");
 const downloadJsonBtn = document.getElementById("downloadJsonBtn");
 const convertMdBtn = document.getElementById("convertMdBtn");
 const downloadMdBtn = document.getElementById("downloadMdBtn");
-
+let tableMode = false;
 let fullData = null;
 let markdownData = null;
 
@@ -359,6 +373,27 @@ window.openUpload = function() {
   fileInput.click();
 };
 
+  const toggle = document.getElementById("viewToggle");
+const knob = document.getElementById("knob");
+const switchUI = document.getElementById("switchUI");
+
+switchUI.onclick = () => {
+  toggle.checked = !toggle.checked;
+  updateToggle();
+};
+
+function updateToggle() {
+  tableMode = toggle.checked;
+
+  // move knob
+  knob.style.left = tableMode ? "20px" : "2px";
+
+  // color change (matches your theme, no override)
+  switchUI.style.background = tableMode ? "#22c55e" : "#64748b";
+
+  renderOutput();
+}
+
 /* =========================
    RESET UI
 ========================= */
@@ -374,6 +409,15 @@ function resetUI() {
   downloadJsonBtn.disabled = true;
   convertMdBtn.disabled = true;
   downloadMdBtn.disabled = true;
+}
+  function renderOutput() {
+  if (!fullData) return;
+
+  if (tableMode) {
+    renderTable(fullData);
+  } else {
+    output.textContent = JSON.stringify(fullData.slice(0, 20), null, 2);
+  }
 }
 
 /* =========================
@@ -508,8 +552,8 @@ async function handleFile(file) {
   }
 
   fullData = rows;
-
-  renderTable(rows);
+updateToggle();
+ renderOutput();
 
   status.textContent = `✅ ${rows.length} rows processed`;
   progress.style.width = "100%";
