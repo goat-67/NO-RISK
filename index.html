@@ -352,36 +352,112 @@ dropzone.addEventListener("drop", e => {
   resetUI();
   handleFile(e.dataTransfer.files[0]);
 });
-
-/* HANDLE FILE */
 async function handleFile(file) {
   if (!file) return;
 
   fileCard.style.display = "block";
   fileCard.innerHTML = `
-  <span class="file-icon">📄</span>
-  <span class="file-name">${file.name}</span>
-  <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
-  <span class="file-check"></span>
-`;
+    <span class="file-icon">📄</span>
+    <span class="file-name">${file.name}</span>
+    <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
+    <span class="file-check"></span>
+  `;
 
-  status.textContent = "Uploading...";
-  progress.style.width = "40%";
+  status.textContent = "Processing...";
+  progress.style.width = "30%";
 
-  const formData = new FormData();
-  formData.append("file", file);
+  let rows = [];
 
-  try {
-    const res = await fetch("https://no-risk-gkhr.onrender.com/upload", {
-  method: "POST",
-  headers: {
-    "x-api-key": "Yp3!Rf8@Qx6#Lm1$Nz9^Ta5&Kc2*Hb7Ud4Vg0WeJk8SxPqR6tM3nB5C7dF9h",
-    "x-internal-secret": "Zk7$Qv9!Lm2#Xr5@Tp8^Wd3*Ns6&Hy1AaB4cD7eF0gHjK9mPqR2sT5uV8wXyZ"
-  },
-  body: formData
-});
+  /* =========================
+     FILE TYPE HANDLING
+  ========================= */
 
-    const data = await res.json();
+  if (file.name.toLowerCase().endsWith(".csv")) {
+    const text = await file.text();
+
+    const lines = text.split("\n").filter(l => l.trim());
+    const headers = lines[0].split(",");
+
+    rows = lines.slice(1).map(line => {
+      const values = line.split(",");
+      let obj = {};
+      headers.forEach((h, i) => {
+        obj[h.trim()] = (values[i] || "").trim();
+      });
+      return obj;
+    });
+
+  } else if (file.name.toLowerCase().endsWith(".xlsx")) {
+
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { type: "array" });
+
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    rows = XLSX.utils.sheet_to_json(sheet);
+
+  } else {
+    status.textContent = "❌ Only CSV or Excel files allowed";
+    progress.style.width = "0%";
+    return;
+  }
+
+  progress.style.width = "60%";
+
+  /* =========================
+     SENSITIVE DATA CHECK
+  ========================= */
+
+  function containsSSN(text) {
+    return /\b\d{3}-\d{2}-\d{4}\b/.test(text);
+  }
+
+  function luhnCheck(num) {
+    let sum = 0, flip = false;
+    for (let i = num.length - 1; i >= 0; i--) {
+      let n = +num[i];
+      if (flip) {
+        n *= 2;
+        if (n > 9) n -= 9;
+      }
+      sum += n;
+      flip = !flip;
+    }
+    return sum % 10 === 0;
+  }
+
+  function containsCard(text) {
+    const digits = text.replace(/[^\d]/g, "");
+    return digits.length >= 13 && digits.length <= 19 && luhnCheck(digits);
+  }
+
+  for (const row of rows) {
+    for (const key in row) {
+      const val = String(row[key]);
+
+      if (containsSSN(val) || containsCard(val)) {
+        status.textContent = "❌ Sensitive data detected";
+        progress.style.width = "0%";
+        return;
+      }
+    }
+  }
+
+  /* =========================
+     SUCCESS
+  ========================= */
+
+  fullData = rows;
+  output.textContent = JSON.stringify(rows.slice(0, 10), null, 2);
+
+  status.textContent = "✅ Passed all checks";
+  progress.style.width = "100%";
+
+  fileCard.querySelector(".file-check").textContent = "✔";
+
+  downloadJsonBtn.disabled = false;
+  convertMdBtn.disabled = false;
+}
+
     progress.style.width = "80%";
 
     if (!res.ok) {
