@@ -410,10 +410,10 @@ function resetUI() {
   convertMdBtn.disabled = true;
   downloadMdBtn.disabled = true;
 }
-  function renderOutput() {
+ function renderOutput() {
   if (!fullData) return;
 
-  if (tableMode) {
+  if (toggle.checked) {
     renderTable(fullData);
   } else {
     output.textContent = JSON.stringify(fullData.slice(0, 20), null, 2);
@@ -551,9 +551,8 @@ async function handleFile(file) {
     }
   }
 
-  fullData = rows;
-updateToggle();
- renderOutput();
+fullData = rows;
+renderOutput();
 
   status.textContent = `✅ ${rows.length} rows processed`;
   progress.style.width = "100%";
