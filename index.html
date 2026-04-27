@@ -354,116 +354,73 @@ const fileCard = document.getElementById("fileCard");
 const downloadJsonBtn = document.getElementById("downloadJsonBtn");
 const convertMdBtn = document.getElementById("convertMdBtn");
 const downloadMdBtn = document.getElementById("downloadMdBtn");
+
+let filesData = [];   // 🔥 ALL FILES STORED HERE
+let currentIndex = 0;
 let tableMode = false;
-let fullData = null;
-let markdownData = null;
 
 /* =========================
-   MODE SWITCH
+   TOGGLE
 ========================= */
-window.setMode = function(mode) {
-  document.body.classList.remove("light", "glass");
-  if (mode !== "dark") document.body.classList.add(mode);
-};
-
-/* =========================
-   OPEN FILE
-========================= */
-window.openUpload = function() {
-  fileInput.click();
-};
-
-  const toggle = document.getElementById("viewToggle");
+const toggle = document.getElementById("viewToggle");
 const knob = document.getElementById("knob");
 const switchUI = document.getElementById("switchUI");
 
 switchUI.onclick = () => {
   toggle.checked = !toggle.checked;
-  updateToggle();
-};
-
-function updateToggle() {
   tableMode = toggle.checked;
 
-  // move knob
   knob.style.left = tableMode ? "20px" : "2px";
-
-  // color change (matches your theme, no override)
   switchUI.style.background = tableMode ? "#22c55e" : "#64748b";
 
   renderOutput();
-}
+};
 
 /* =========================
-   RESET UI
+   RESET
 ========================= */
 function resetUI() {
   output.innerHTML = "";
-  status.textContent = "Upload a File...";
+  status.textContent = "Upload files...";
   progress.style.width = "0%";
-  fileCard.style.display = "none";
-
-  fullData = null;
-  markdownData = null;
-
-  downloadJsonBtn.disabled = true;
-  convertMdBtn.disabled = true;
-  downloadMdBtn.disabled = true;
-}
- function renderOutput() {
-  if (!fullData) return;
-
-  if (toggle.checked) {
-    renderTable(fullData);
-  } else {
-    output.textContent = JSON.stringify(fullData.slice(0, 20), null, 2);
-  }
+  fileCard.innerHTML = "";
+  filesData = [];
+  currentIndex = 0;
 }
 
 /* =========================
-   CSV PARSER (SMART)
+   RENDER
 ========================= */
-function parseCSV(text) {
-  const rows = [];
-  const lines = text.split("\n").filter(l => l.trim());
+function renderOutput() {
+  if (!filesData.length) return;
 
-  const headers = lines[0].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+  const data = filesData[currentIndex].rows;
 
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-    let obj = {};
-
-    headers.forEach((h, j) => {
-      obj[h.replace(/"/g, "").trim()] =
-        (values[j] || "").replace(/"/g, "").trim();
-    });
-
-    rows.push(obj);
+  if (tableMode) {
+    renderTable(data);
+  } else {
+    output.textContent = JSON.stringify(data.slice(0, 20), null, 2);
   }
 
-  return rows;
+  status.textContent = `Viewing ${filesData[currentIndex].name} (${currentIndex+1}/${filesData.length})`;
 }
 
 /* =========================
-   TABLE RENDER
+   TABLE
 ========================= */
 function renderTable(data) {
   if (!data.length) return;
 
   const keys = Object.keys(data[0]);
-  let html = "<table style='width:100%; border-collapse: collapse;'>";
+  let html = "<table style='width:100%;border-collapse:collapse;'>";
 
   html += "<tr>";
-  keys.forEach(k => {
-    html += `<th style="padding:8px; text-align:left; border-bottom:1px solid #ccc;">${k}</th>`;
-  });
+  keys.forEach(k => html += `<th style="padding:8px;border-bottom:1px solid #ccc;">${k}</th>`);
   html += "</tr>";
 
-  data.slice(0, 20).forEach(row => {
+  data.slice(0,20).forEach(row => {
     html += "<tr>";
-    keys.forEach(k => {
-      html += `<td style="padding:6px; border-bottom:1px solid rgba(255,255,255,0.05);">${row[k] ?? ""}</td>`;
-    });
+    keys.forEach(k => html += `<td style="padding:6px;">${row[k] ?? ""}</td>`);
     html += "</tr>";
   });
 
@@ -472,171 +429,162 @@ function renderTable(data) {
 }
 
 /* =========================
-   SENSITIVE CHECK
+   PARSE CSV
+========================= */
+function parseCSV(text) {
+  const rows = [];
+  const lines = text.split("\n").filter(l => l.trim());
+
+  const headers = lines[0].split(",");
+
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(",");
+    let obj = {};
+    headers.forEach((h, j) => obj[h.trim()] = values[j]?.trim());
+    rows.push(obj);
+  }
+  return rows;
+}
+
+/* =========================
+   SECURITY CHECK
 ========================= */
 function containsSSN(text) {
   return /\b\d{3}-\d{2}-\d{4}\b/.test(text);
 }
 
-function luhnCheck(num) {
-  let sum = 0, flip = false;
-  for (let i = num.length - 1; i >= 0; i--) {
-    let n = +num[i];
-    if (flip) {
-      n *= 2;
-      if (n > 9) n -= 9;
-    }
-    sum += n;
-    flip = !flip;
-  }
-  return sum % 10 === 0;
-}
-
 function containsCard(text) {
   const digits = text.replace(/[^\d]/g, "");
-  return digits.length >= 13 && digits.length <= 19 && luhnCheck(digits);
+  return digits.length >= 13 && digits.length <= 19;
 }
 
 /* =========================
-   HANDLE FILE
+   MAIN MULTI FILE HANDLER
 ========================= */
-async function handleFile(file) {
-  if (!file) return;
+async function handleMultipleFiles(files) {
+  if (!files || !files.length) return;
 
   resetUI();
 
-  fileCard.style.display = "flex";
-  fileCard.innerHTML = `
-    <span class="file-icon">📄</span>
-    <span class="file-name">${file.name}</span>
-    <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
-    <span class="file-type">${file.name.split('.').pop().toUpperCase()}</span>
-    <span class="file-check"></span>
-  `;
+  let totalRows = 0;
 
-  status.textContent = "Processing...";
-  progress.style.width = "30%";
+  for (let file of files) {
 
-  let rows = [];
+    status.textContent = `Processing ${file.name}...`;
+    progress.style.width = "30%";
 
-  if (file.name.toLowerCase().endsWith(".csv")) {
-    const text = await file.text();
-    rows = parseCSV(text);
+    let rows = [];
 
-  } else if (file.name.toLowerCase().endsWith(".xlsx")) {
+    if (file.name.endsWith(".csv")) {
+      const text = await file.text();
+      rows = parseCSV(text);
 
-    const data = await file.arrayBuffer();
-    const workbook = XLSX.read(data, { type: "array" });
+    } else if (file.name.endsWith(".xlsx")) {
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data, { type: "array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(sheet);
 
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    rows = XLSX.utils.sheet_to_json(sheet);
+    } else {
+      continue;
+    }
 
-  } else {
-    status.textContent = "❌ Only CSV or Excel files allowed";
-    progress.style.width = "0%";
-    return;
-  }
-
-  progress.style.width = "60%";
-
-  for (const row of rows) {
-    for (const key in row) {
-      const val = String(row[key]);
-
-      if (containsSSN(val) || containsCard(val)) {
-        status.textContent = "❌ Sensitive data detected";
-        progress.style.width = "0%";
-        return;
+    // security scan
+    for (const row of rows) {
+      for (const key in row) {
+        const val = String(row[key]);
+        if (containsSSN(val) || containsCard(val)) {
+          status.textContent = "❌ Sensitive data detected";
+          return;
+        }
       }
     }
+
+    filesData.push({
+      name: file.name,
+      rows: rows
+    });
+
+    totalRows += rows.length;
   }
 
-fullData = rows;
-renderOutput();
-
-  status.textContent = `✅ ${rows.length} rows processed`;
   progress.style.width = "100%";
 
-  fileCard.querySelector(".file-check").textContent = "✔";
+  // show file list
+  fileCard.style.display = "flex";
+  fileCard.innerHTML = filesData.map((f,i) =>
+    `<span style="margin-right:8px;cursor:pointer;" onclick="switchFile(${i})">${f.name}</span>`
+  ).join("");
+
+  renderOutput();
+
+  status.textContent = `✅ ${filesData.length} files loaded (${totalRows} rows)`;
 
   downloadJsonBtn.disabled = false;
   convertMdBtn.disabled = false;
 }
 
 /* =========================
+   SWITCH FILE
+========================= */
+window.switchFile = function(index) {
+  currentIndex = index;
+  renderOutput();
+};
+
+/* =========================
+   DOWNLOAD (CURRENT)
+========================= */
+downloadJsonBtn.onclick = () => {
+  const data = filesData[currentIndex];
+  const blob = new Blob([JSON.stringify(data.rows)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = data.name + ".json";
+  a.click();
+};
+
+/* =========================
+   DOWNLOAD ALL
+========================= */
+function downloadAll() {
+  const blob = new Blob(
+    [JSON.stringify(filesData.map(f => ({name:f.name,data:f.rows})))],
+    {type:"application/json"}
+  );
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "all_files.json";
+  a.click();
+}
+
+/* =========================
    EVENTS
 ========================= */
-
 fileInput.addEventListener("change", () => {
-  handleFile(fileInput.files[0]);
-});
+  const files = Array.from(fileInput.files);
 
-dropzone.addEventListener("click", openUpload);
+  if (files.length > 15) {
+    status.textContent = "❌ Max 15 files";
+    return;
+  }
 
-dropzone.addEventListener("dragover", e => {
-  e.preventDefault();
-  dropzone.classList.add("hover");
-  dropzone.textContent = "Drop file 🚀";
-});
+  const totalSize = files.reduce((s,f)=>s+f.size,0);
+  if (totalSize > 20 * 1024 * 1024) {
+    status.textContent = "❌ Max 20MB total";
+    return;
+  }
 
-dropzone.addEventListener("dragleave", () => {
-  dropzone.classList.remove("hover");
-  dropzone.textContent = "Drag & Drop File";
+  handleMultipleFiles(files);
 });
 
 dropzone.addEventListener("drop", e => {
   e.preventDefault();
-  dropzone.classList.remove("hover");
-  dropzone.textContent = "Drag & Drop File";
-  handleFile(e.dataTransfer.files[0]);
+  const files = Array.from(e.dataTransfer.files);
+  handleMultipleFiles(files);
 });
 
-/* =========================
-   DOWNLOAD JSON
-========================= */
-downloadJsonBtn.onclick = () => {
-  if (!fullData) return;
-
-  const blob = new Blob([JSON.stringify(fullData)], {type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "file.json";
-  a.click();
-};
-
-/* =========================
-   CONVERT MD
-========================= */
-convertMdBtn.onclick = () => {
-  if (!fullData || !fullData.length) return;
-
-  const keys = Object.keys(fullData[0]);
-
-  let md = "| " + keys.join(" | ") + " |\n";
-  md += "| " + keys.map(() => "---").join(" | ") + " |\n";
-
-  fullData.forEach(r => {
-    md += "| " + keys.map(k => r[k]).join(" | ") + " |\n";
-  });
-
-  markdownData = md;
-  output.textContent = md;
-
-  downloadMdBtn.disabled = false;
-};
-
-/* =========================
-   DOWNLOAD MD
-========================= */
-downloadMdBtn.onclick = () => {
-  if (!markdownData) return;
-
-  const blob = new Blob([markdownData], {type:"text/markdown"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "file.md";
-  a.click();
-};
+dropzone.addEventListener("click", () => fileInput.click());
 
 });
 </script>
