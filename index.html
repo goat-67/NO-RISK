@@ -382,6 +382,7 @@ switchUI.onclick = () => {
   toggle.checked = !toggle.checked;
   knob.style.left = toggle.checked ? "20px" : "2px";
   switchUI.style.background = toggle.checked ? "#22c55e" : "#64748b";
+   viewMode = toggle.checked ? "table" : "json";
   renderOutput();
 };
 
