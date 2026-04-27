@@ -365,6 +365,16 @@ let currentIndex = 0;
 let fullData = null;
 let markdownData = null;
 
+  window.setMode = function(mode) {
+  document.body.classList.remove("light", "glass");
+
+  if (mode === "light") {
+    document.body.classList.add("light");
+  } else if (mode === "glass") {
+    document.body.classList.add("glass");
+  }
+  // dark = default (no class)
+};
 /* =========================
    TOGGLE JSON / TABLE
 ========================= */
@@ -400,14 +410,24 @@ function renderOutput() {
   const file = filesData[currentIndex];
   fullData = file.rows;
 
+  // 🔥 If in MD mode, DO NOT override it
+  if (viewMode === "md" && markdownData) {
+    output.textContent = markdownData;
+    status.textContent = `Viewing ALL files (Markdown mode)`;
+    renderFileCard();
+    return;
+  }
+
+  // normal modes
   if (toggle.checked) {
+    viewMode = "table";
     renderTable(fullData);
   } else {
+    viewMode = "json";
     output.textContent = JSON.stringify(fullData.slice(0, 20), null, 2);
   }
 
   status.textContent = `Viewing ${file.name} (${currentIndex+1}/${filesData.length})`;
-
   renderFileCard();
 }
 
