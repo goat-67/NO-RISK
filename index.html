@@ -412,12 +412,19 @@ function renderOutput() {
   fullData = file.rows;
 
   // 🔥 If in MD mode, DO NOT override it
-  if (viewMode === "md" && markdownData) {
-    output.textContent = markdownData;
-    status.textContent = `Viewing ALL files (Markdown mode)`;
-    renderFileCard();
-    return;
+  if (viewMode === "md") {
+  const file = filesData[currentIndex];
+
+  if (!file.md) {
+    output.textContent = "No markdown yet";
+  } else {
+    output.textContent = file.md;
   }
+
+  status.textContent = `Viewing ${file.name} (Markdown mode)`;
+  renderFileCard();
+  return;
+}
 
   // normal modes
   if (toggle.checked) {
@@ -568,11 +575,12 @@ async function handleMultipleFiles(files) {
       }
     }
 
-    filesData.push({
-      name: file.name,
-      rows: rows,
-      size: file.size
-    });
+   filesData.push({
+  name: file.name,
+  rows: rows,
+  size: file.size,
+  md: null // 👈 add this
+});
 
     totalRows += rows.length;
   }
@@ -636,6 +644,7 @@ convertMdBtn.onclick = () => {
       finalMD += "| " + keys.map(k => r[k] ?? "").join(" | ") + " |\n";
     });
 viewMode = "md"; 
+        file.md = md;
     finalMD += "\n";
   });
 
