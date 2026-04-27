@@ -611,10 +611,13 @@ downloadJsonBtn.onclick = () => {
 /* =========================
    DOWNLOAD ALL
 ========================= */
+/* =========================
+   DOWNLOAD ALL (JSON)
+========================= */
 window.downloadAll = function() {
   const blob = new Blob(
-    [JSON.stringify(filesData.map(f => ({name:f.name,data:f.rows})))],
-    {type:"application/json"}
+    [JSON.stringify(filesData.map(f => ({name: f.name, data: f.rows})))],
+    { type: "application/json" }
   );
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -623,12 +626,10 @@ window.downloadAll = function() {
 };
 
 /* =========================
-   CONVERT TO MD
+   CONVERT TO MD (PER FILE)
 ========================= */
 convertMdBtn.onclick = () => {
-  if (!filesData || !filesData.length) return;
-
-  let finalMD = "";
+  if (!filesData.length) return;
 
   filesData.forEach(file => {
     const data = file.rows;
@@ -636,37 +637,36 @@ convertMdBtn.onclick = () => {
 
     const keys = Object.keys(data[0]);
 
-    finalMD += `## ${file.name}\n\n`;
-    finalMD += "| " + keys.join(" | ") + " |\n";
-    finalMD += "| " + keys.map(() => "---").join(" | ") + " |\n";
+    let md = "| " + keys.join(" | ") + " |\n";
+    md += "| " + keys.map(() => "---").join(" | ") + " |\n";
 
     data.forEach(r => {
-      finalMD += "| " + keys.map(k => r[k] ?? "").join(" | ") + " |\n";
+      md += "| " + keys.map(k => r[k] ?? "").join(" | ") + " |\n";
     });
-viewMode = "md"; 
-        file.md = md;
-    finalMD += "\n";
+
+    file.md = md;
   });
 
-  markdownData = finalMD;
-  output.textContent = finalMD;
+  viewMode = "md";
+  renderOutput();
 
   downloadMdBtn.disabled = false;
 };
 
 /* =========================
-   DOWNLOAD MD
+   DOWNLOAD CURRENT MD
 ========================= */
 downloadMdBtn.onclick = () => {
-  if (!markdownData) return;
+  const file = filesData[currentIndex];
 
-  const blob = new Blob([markdownData], {type:"text/markdown"});
+  if (!file || !file.md) return;
+
+  const blob = new Blob([file.md], { type: "text/markdown" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "file.md";
+  a.download = file.name + ".md";
   a.click();
 };
-
 /* =========================
    EVENTS
 ========================= */
