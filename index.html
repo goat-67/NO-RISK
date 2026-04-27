@@ -359,7 +359,7 @@ const downloadMdBtn = document.getElementById("downloadMdBtn");
 const toggle = document.getElementById("viewToggle");
 const knob = document.getElementById("knob");
 const switchUI = document.getElementById("switchUI");
-
+let viewMode = "json"; // 🔥 THIS WAS MISSING
 let filesData = [];
 let currentIndex = 0;
 let fullData = null;
@@ -634,7 +634,7 @@ convertMdBtn.onclick = () => {
     data.forEach(r => {
       finalMD += "| " + keys.map(k => r[k] ?? "").join(" | ") + " |\n";
     });
-
+viewMode = "md"; 
     finalMD += "\n";
   });
 
