@@ -325,7 +325,7 @@ No data is uploaded or stored.</div>
   <p>Upload CSV or Excel and convert instantly</p>
 
   <div id="dropzone">Drag & Drop File 🚀</div>
-  <input type="file" id="fileInput" hidden>
+ <input type="file" id="fileInput" multiple hidden>
 
   <div id="fileCard"></div>
 
@@ -334,6 +334,7 @@ No data is uploaded or stored.</div>
     <button id="downloadJsonBtn" disabled>Download JSON</button>
     <button id="convertMdBtn" disabled>Convert to MD</button>
     <button id="downloadMdBtn" disabled>Download MD</button>
+    <button onclick="downloadAll()">Download ALL</button>
   </div>
 
   <div id="status">Upload a File</div>
