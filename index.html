@@ -311,7 +311,7 @@ No data is uploaded or stored.</div>
   <div class="logo">NO-risk</div>
 
   <div class="nav-links">
-    <a href="#" onclick="openUpload()">Upload</a>
+   
     <a href="https://github.com/goat-67/NO-risk#readme" target="_blank">About</a>
 
     <span class="toggle" onclick="setMode('dark')">🌙</span>
@@ -324,13 +324,13 @@ No data is uploaded or stored.</div>
   <h1>File → JSON / Markdown</h1>
   <p>Upload CSV or Excel and convert instantly</p>
 
-  <div id="dropzone">Drag & Drop File 🚀</div>
+  <div id="dropzone">Drag & Drop File 🚀 OR click to Upload</div>
  <input type="file" id="fileInput" multiple hidden>
 
   <div id="fileCard"></div>
 
   <div>
-    <button onclick="openUpload()">Upload File</button>
+   
     <button id="downloadJsonBtn" disabled>Download JSON</button>
     <button id="convertMdBtn" disabled>Convert to MD</button>
     <button id="downloadMdBtn" disabled>Download MD</button>
@@ -597,18 +597,30 @@ window.downloadAll = function() {
    CONVERT TO MD
 ========================= */
 convertMdBtn.onclick = () => {
-  if (!fullData) return;
+  if (!filesData || !filesData.length) return;
 
-  const keys = Object.keys(fullData[0]);
-  let md = "| " + keys.join(" | ") + " |\n";
-  md += "| " + keys.map(() => "---").join(" | ") + " |\n";
+  let finalMD = "";
 
-  fullData.forEach(r => {
-    md += "| " + keys.map(k => r[k]).join(" | ") + " |\n";
+  filesData.forEach(file => {
+    const data = file.rows;
+    if (!data || !data.length) return;
+
+    const keys = Object.keys(data[0]);
+
+    finalMD += `## ${file.name}\n\n`;
+    finalMD += "| " + keys.join(" | ") + " |\n";
+    finalMD += "| " + keys.map(() => "---").join(" | ") + " |\n";
+
+    data.forEach(r => {
+      finalMD += "| " + keys.map(k => r[k] ?? "").join(" | ") + " |\n";
+    });
+
+    finalMD += "\n";
   });
 
-  markdownData = md;
-  output.textContent = md;
+  markdownData = finalMD;
+  output.textContent = finalMD;
+
   downloadMdBtn.disabled = false;
 };
 
