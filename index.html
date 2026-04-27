@@ -341,6 +341,7 @@ No data is uploaded or stored.</div>
   <div id="progressBar"></div>
   <div id="output"></div>
 </div>
+  <script src="papaparse.min.js"></script>
 <script src="xlsx.full.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -508,21 +509,45 @@ function renderTable(data) {
 /* =========================
    CSV PARSER
 ========================= */
-function parseCSV(text) {
-  const rows = [];
-  const lines = text.split("\n").filter(l => l.trim());
-  const headers = lines[0].split(",");
 
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(",");
-    let obj = {};
-    headers.forEach((h, j) => obj[h.trim()] = values[j]?.trim());
-    rows.push(obj);
+
+  function validateRows(rows) {
+  let issues = [];
+
+  if (!rows.length) {
+    issues.push("File is empty");
+    return issues;
   }
-  return rows;
+
+  const keys = Object.keys(rows[0]);
+
+  rows.forEach((row, i) => {
+    // check column count
+    if (Object.keys(row).length !== keys.length) {
+      issues.push(`Row ${i+1}: column mismatch`);
+    }
+
+    // check empty values
+    for (const key of keys) {
+      const val = row[key];
+
+      if (val === "" || val === null || val === undefined) {
+        issues.push(`Row ${i+1}: empty "${key}"`);
+      }
+      if (typeof val === "string" && val.length > 200) {
+    issues.push(`Row ${i+1}: unusually long value in "${key}"`);
+  }
+
+     
+    }
+  });
+
+  return issues;
 }
 
 /* =========================
+
+
    SECURITY
 ========================= */
 function containsSSN(text) {
@@ -553,7 +578,10 @@ async function handleMultipleFiles(files) {
 
     if (file.name.endsWith(".csv")) {
       const text = await file.text();
-      rows = parseCSV(text);
+    rows = Papa.parse(text, {
+  header: true,
+  skipEmptyLines: true
+}).data;
 
     } else if (file.name.endsWith(".xlsx")) {
       const data = await file.arrayBuffer();
@@ -564,6 +592,12 @@ async function handleMultipleFiles(files) {
     } else {
       continue;
     }
+    const issues = validateRows(rows);
+
+if (issues.length) {
+  status.textContent = "⚠️ Validation issues found";
+  console.warn(file.name, issues);
+}
 
     for (const row of rows) {
       for (const key in row) {
