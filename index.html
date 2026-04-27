@@ -356,24 +356,22 @@ const downloadJsonBtn = document.getElementById("downloadJsonBtn");
 const convertMdBtn = document.getElementById("convertMdBtn");
 const downloadMdBtn = document.getElementById("downloadMdBtn");
 
-let filesData = [];   // 🔥 ALL FILES STORED HERE
-let currentIndex = 0;
-let tableMode = false;
-
-/* =========================
-   TOGGLE
-========================= */
 const toggle = document.getElementById("viewToggle");
 const knob = document.getElementById("knob");
 const switchUI = document.getElementById("switchUI");
 
+let filesData = [];
+let currentIndex = 0;
+let fullData = null;
+let markdownData = null;
+
+/* =========================
+   TOGGLE JSON / TABLE
+========================= */
 switchUI.onclick = () => {
   toggle.checked = !toggle.checked;
-  tableMode = toggle.checked;
-
-  knob.style.left = tableMode ? "20px" : "2px";
-  switchUI.style.background = tableMode ? "#22c55e" : "#64748b";
-
+  knob.style.left = toggle.checked ? "20px" : "2px";
+  switchUI.style.background = toggle.checked ? "#22c55e" : "#64748b";
   renderOutput();
 };
 
@@ -387,24 +385,74 @@ function resetUI() {
   fileCard.innerHTML = "";
   filesData = [];
   currentIndex = 0;
+
+  downloadJsonBtn.disabled = true;
+  convertMdBtn.disabled = true;
+  downloadMdBtn.disabled = true;
 }
 
 /* =========================
-   RENDER
+   RENDER OUTPUT
 ========================= */
 function renderOutput() {
   if (!filesData.length) return;
 
-  const data = filesData[currentIndex].rows;
+  const file = filesData[currentIndex];
+  fullData = file.rows;
 
-  if (tableMode) {
-    renderTable(data);
+  if (toggle.checked) {
+    renderTable(fullData);
   } else {
-    output.textContent = JSON.stringify(data.slice(0, 20), null, 2);
+    output.textContent = JSON.stringify(fullData.slice(0, 20), null, 2);
   }
 
-  status.textContent = `Viewing ${filesData[currentIndex].name} (${currentIndex+1}/${filesData.length})`;
+  status.textContent = `Viewing ${file.name} (${currentIndex+1}/${filesData.length})`;
+
+  renderFileCard();
 }
+
+/* =========================
+   FILE CARD + ARROWS
+========================= */
+function renderFileCard() {
+  const f = filesData[currentIndex];
+
+  fileCard.style.display = "flex";
+  fileCard.style.justifyContent = "space-between";
+  fileCard.style.alignItems = "center";
+
+  fileCard.innerHTML = `
+    <button onclick="prevFile()">⬅️</button>
+
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="file-icon">📄</span>
+      <span>${f.name}</span>
+      <span style="font-size:12px;opacity:0.6;">
+        ${(f.size/1024).toFixed(1)} KB
+      </span>
+      <span style="color:#22c55e;">✔</span>
+    </div>
+
+    <button onclick="nextFile()">➡️</button>
+  `;
+}
+
+/* =========================
+   SWITCH FILES
+========================= */
+window.nextFile = function() {
+  if (currentIndex < filesData.length - 1) {
+    currentIndex++;
+    renderOutput();
+  }
+};
+
+window.prevFile = function() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderOutput();
+  }
+};
 
 /* =========================
    TABLE
@@ -430,12 +478,11 @@ function renderTable(data) {
 }
 
 /* =========================
-   PARSE CSV
+   CSV PARSER
 ========================= */
 function parseCSV(text) {
   const rows = [];
   const lines = text.split("\n").filter(l => l.trim());
-
   const headers = lines[0].split(",");
 
   for (let i = 1; i < lines.length; i++) {
@@ -448,7 +495,7 @@ function parseCSV(text) {
 }
 
 /* =========================
-   SECURITY CHECK
+   SECURITY
 ========================= */
 function containsSSN(text) {
   return /\b\d{3}-\d{2}-\d{4}\b/.test(text);
@@ -460,7 +507,7 @@ function containsCard(text) {
 }
 
 /* =========================
-   MAIN MULTI FILE HANDLER
+   HANDLE FILES
 ========================= */
 async function handleMultipleFiles(files) {
   if (!files || !files.length) return;
@@ -490,7 +537,6 @@ async function handleMultipleFiles(files) {
       continue;
     }
 
-    // security scan
     for (const row of rows) {
       for (const key in row) {
         const val = String(row[key]);
@@ -503,19 +549,14 @@ async function handleMultipleFiles(files) {
 
     filesData.push({
       name: file.name,
-      rows: rows
+      rows: rows,
+      size: file.size
     });
 
     totalRows += rows.length;
   }
 
   progress.style.width = "100%";
-
-  // show file list
-  fileCard.style.display = "flex";
-  fileCard.innerHTML = filesData.map((f,i) =>
-    `<span style="margin-right:8px;cursor:pointer;" onclick="switchFile(${i})">${f.name}</span>`
-  ).join("");
 
   renderOutput();
 
@@ -526,29 +567,22 @@ async function handleMultipleFiles(files) {
 }
 
 /* =========================
-   SWITCH FILE
-========================= */
-window.switchFile = function(index) {
-  currentIndex = index;
-  renderOutput();
-};
-
-/* =========================
-   DOWNLOAD (CURRENT)
+   DOWNLOAD CURRENT
 ========================= */
 downloadJsonBtn.onclick = () => {
-  const data = filesData[currentIndex];
-  const blob = new Blob([JSON.stringify(data.rows)], {type:"application/json"});
+  if (!fullData) return;
+
+  const blob = new Blob([JSON.stringify(fullData)], {type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = data.name + ".json";
+  a.download = filesData[currentIndex].name + ".json";
   a.click();
 };
 
 /* =========================
    DOWNLOAD ALL
 ========================= */
-function downloadAll() {
+window.downloadAll = function() {
   const blob = new Blob(
     [JSON.stringify(filesData.map(f => ({name:f.name,data:f.rows})))],
     {type:"application/json"}
@@ -557,7 +591,39 @@ function downloadAll() {
   a.href = URL.createObjectURL(blob);
   a.download = "all_files.json";
   a.click();
-}
+};
+
+/* =========================
+   CONVERT TO MD
+========================= */
+convertMdBtn.onclick = () => {
+  if (!fullData) return;
+
+  const keys = Object.keys(fullData[0]);
+  let md = "| " + keys.join(" | ") + " |\n";
+  md += "| " + keys.map(() => "---").join(" | ") + " |\n";
+
+  fullData.forEach(r => {
+    md += "| " + keys.map(k => r[k]).join(" | ") + " |\n";
+  });
+
+  markdownData = md;
+  output.textContent = md;
+  downloadMdBtn.disabled = false;
+};
+
+/* =========================
+   DOWNLOAD MD
+========================= */
+downloadMdBtn.onclick = () => {
+  if (!markdownData) return;
+
+  const blob = new Blob([markdownData], {type:"text/markdown"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "file.md";
+  a.click();
+};
 
 /* =========================
    EVENTS
@@ -579,13 +645,22 @@ fileInput.addEventListener("change", () => {
   handleMultipleFiles(files);
 });
 
-dropzone.addEventListener("drop", e => {
+dropzone.addEventListener("click", () => fileInput.click());
+
+dropzone.addEventListener("dragover", e => {
   e.preventDefault();
-  const files = Array.from(e.dataTransfer.files);
-  handleMultipleFiles(files);
+  dropzone.classList.add("hover");
 });
 
-dropzone.addEventListener("click", () => fileInput.click());
+dropzone.addEventListener("dragleave", () => {
+  dropzone.classList.remove("hover");
+});
+
+dropzone.addEventListener("drop", e => {
+  e.preventDefault();
+  dropzone.classList.remove("hover");
+  handleMultipleFiles(Array.from(e.dataTransfer.files));
+});
 
 });
 </script>
